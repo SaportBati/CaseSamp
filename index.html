@@ -760,7 +760,9 @@
     <label for="nickName">Ник:</label>
     <input id="nickName" type="text" maxlength="24" placeholder="Игрок">
   </div>
-  <audio id="openSound" src="https://github.com/SaportBati/huinya/raw/refs/heads/main/open-sound.mp3" preload="auto"></audio>
+  <audio id="openSound" src="https://raw.githubusercontent.com/SaportBati/CaseSamp/refs/heads/main/open.mp3" preload="auto"></audio>
+  <audio id="tickSound" src="https://raw.githubusercontent.com/SaportBati/CaseSamp/refs/heads/main/mis.mp3" preload="auto"></audio>
+  <audio id="finishSound" src="https://raw.githubusercontent.com/SaportBati/CaseSamp/refs/heads/main/finish.mp3" preload="auto"></audio>
 
   <div class="stage-area">
     <!-- crate -->
@@ -1305,6 +1307,8 @@ window.resolveImageUrl = function(src){
   const root = document.documentElement;
   const themeColor = document.getElementById('themeColor');
   const openSound = document.getElementById('openSound');
+  const tickSound = document.getElementById('tickSound');
+  const finishSound = document.getElementById('finishSound');
 
   // ===== выбор кейса =====
   const btnSelectCase = document.getElementById('btnSelectCase');
@@ -1495,21 +1499,40 @@ window.resolveImageUrl = function(src){
     if(e.key === 'Escape') closeSettings();
   });
 
-  // timings measured from the uploaded track: crate thud 0-1s, reel rattle
-  // starts ~1-2s, the prize "hit" peak is at ~8.0-8.05s.
-  const CRATE_ANIM_MS = 950;      // how long the crate shakes before crossfading
-  const SPIN_START_AUDIO_TIME = 1.0; // where in the track the spin sound begins
-  const SPIN_DURATION = 7.05;     // seconds the reel spins for, timed to land the hit at ~8.0s in
+  // Теперь звук разбит на 3 отдельных файла вместо одного трека с таймингами:
+  //  - openSound  (open.mp3)   — играет один раз в момент тряски/открытия кейса
+  //  - tickSound  (mis.mp3)    — играет короткими "тиками" на каждом переходе
+  //                              барабана от одного приза к следующему
+  //  - finishSound (finish.mp3)— играет один раз, как только барабан
+  //                              остановился и приз показан
+  const CRATE_ANIM_MS = 950;   // сколько трясётся ящик перед переходом в барабан
+  const SPIN_DURATION = 7.05;  // сколько секунд крутится барабан
 
-  function playSound(fromSeconds){
+  function playOpenSound(){
     try{
-      openSound.currentTime = fromSeconds;
+      openSound.currentTime = 0;
       openSound.play().catch(()=>{});
     }catch(e){}
   }
-  function stopSound(){
-    openSound.pause();
-    openSound.currentTime = 0;
+  function playTickSound(){
+    try{
+      // клонируем узел, чтобы тики могли звучать внахлёст друг на друга
+      // на быстрых участках прокрутки, не обрезая предыдущий звук
+      const t = tickSound.cloneNode(true);
+      t.volume = tickSound.volume;
+      t.play().catch(()=>{});
+    }catch(e){}
+  }
+  function playFinishSound(){
+    try{
+      finishSound.currentTime = 0;
+      finishSound.play().catch(()=>{});
+    }catch(e){}
+  }
+  function stopAllSounds(){
+    [openSound, finishSound].forEach(a=>{
+      try{ a.pause(); a.currentTime = 0; }catch(e){}
+    });
   }
 
   const stageCrate = document.getElementById('stageCrate');
@@ -2133,10 +2156,21 @@ window.resolveImageUrl = function(src){
     const durationMs = durationSec * 1000;
     const startTime = performance.now();
 
+    // индекс приза, который сейчас проходит под указателем — используется
+    // только чтобы поймать момент перехода на следующий блок и проиграть
+    // короткий "тик" (mis.mp3); сам барабан от этого не зависит
+    let lastTickIndex = Math.floor((viewportCenter - 0) / itemFullWidth);
+
     function frame(now){
       const t = Math.min((now - startTime) / durationMs, 1);
       const currentX = targetX * easeOutSlot(t);
       strip.style.transform = `translateX(${currentX}px)`;
+
+      const passedIndex = Math.floor((viewportCenter - currentX) / itemFullWidth);
+      if(passedIndex > lastTickIndex){
+        lastTickIndex = passedIndex;
+        playTickSound();
+      }
 
       if(t < 1){
         requestAnimationFrame(frame);
@@ -2157,6 +2191,7 @@ window.resolveImageUrl = function(src){
     revealName.textContent = winner.name;
 
     revealOverlay.classList.add('show');
+    playFinishSound();
     addToFeed(winner);
     spinning = false;
   }
@@ -2169,7 +2204,7 @@ window.resolveImageUrl = function(src){
 
     crate.classList.add('shaking');
     flash.classList.add('go');
-    playSound(0);
+    playOpenSound();
 
     setTimeout(()=>{
       crate.classList.remove('shaking');
@@ -2184,19 +2219,19 @@ window.resolveImageUrl = function(src){
     }, CRATE_ANIM_MS);
   });
 
-  // "Открыть ещё" - fade the result out, un-dim the reel, spin again (no crate)
+  // "Открыть ещё" - fade the result out, un-dim the reel, spin again (no crate,
+  // так что open.mp3 здесь не нужен — тики mis.mp3 сыграют сами в процессе)
   btnAgain.addEventListener('click', ()=>{
     if(spinning) return;
     revealOverlay.classList.remove('show');
     setTimeout(()=>{
-      playSound(SPIN_START_AUDIO_TIME);
       spinReel(SPIN_DURATION);
     }, 380);
   });
 
   // "Закрыть" - fade everything back to the closed crate
   btnClose.addEventListener('click', ()=>{
-    stopSound();
+    stopAllSounds();
     revealOverlay.classList.remove('show');
     stageReel.classList.remove('show');
     stageCrate.classList.remove('hide');
