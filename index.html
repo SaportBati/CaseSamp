@@ -681,33 +681,25 @@
     letter-spacing:.03em;text-align:center;margin:0 0 32px;
   }
   .gallery-grid{
-    display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
-    gap:20px;
+    display:grid;grid-template-columns:repeat(auto-fit, minmax(190px, 1fr));
+    gap:32px 24px;
   }
   .gallery-card{
-    background:linear-gradient(180deg, var(--panel), var(--panel-2));
-    border:1px solid var(--line);border-radius:8px;overflow:hidden;
     cursor:pointer;text-align:center;
-    transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+    display:flex;flex-direction:column;align-items:center;gap:14px;
+    transition:transform .18s ease, opacity .18s ease;
   }
-  .gallery-card:hover{
-    transform:translateY(-4px);
-    border-color:var(--item-color, var(--accent));
-    box-shadow:0 14px 40px color-mix(in srgb, var(--item-color, var(--accent)) 30%, transparent);
-  }
+  .gallery-card:hover{transform:translateY(-6px);}
   .gallery-card-image{
-    height:150px;display:flex;align-items:center;justify-content:center;
-    background:radial-gradient(ellipse at 50% 30%, color-mix(in srgb, var(--item-color, var(--accent)) 22%, transparent), transparent 70%);
-    border-bottom:1px solid var(--line);
+    width:100%;aspect-ratio:1/1;max-width:210px;
+    display:flex;align-items:center;justify-content:center;
+    filter:drop-shadow(0 0 26px color-mix(in srgb, var(--item-color, var(--accent)) 50%, transparent));
   }
-  .gallery-card-image img{max-width:70%;max-height:70%;object-fit:contain;
-    filter:drop-shadow(0 0 18px color-mix(in srgb, var(--item-color, var(--accent)) 55%, transparent));}
-  .gallery-card-fallback{font-size:44px;opacity:.85;}
+  .gallery-card-image img{width:100%;height:100%;object-fit:contain;}
+  .gallery-card-fallback{font-size:64px;opacity:.85;}
   .gallery-card-name{
     font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;
-    padding:16px 14px 4px;
   }
-  .gallery-card-count{font-size:12px;color:var(--text-dim);padding:0 14px 16px;}
 </style>
 </head>
 <body class="not-authed browsing-gallery">
@@ -837,10 +829,8 @@
         </div>
       </div>
       <div class="theme-row" style="margin-top:14px;">
-        <select id="caseImageSelect">
-          <option value="">Без картинки (стандартный ящик)</option>
-        </select>
-        <label>Картинка кейса (сундук, показывается до открытия)</label>
+        <input type="text" id="caseImageInput" placeholder="https://.../case.png" style="flex:1;min-width:220px;background:var(--panel-2);border:1px solid var(--line);color:var(--text);padding:9px 10px;border-radius:2px;font-size:14px;">
+        <label>Ссылка на картинку кейса (сундук, показывается до открытия)</label>
       </div>
     </div>
 
@@ -928,6 +918,13 @@ window.CASE_IMAGES = [
 // кейса). Файл должен лежать рядом с картинками в том же репозитории
 // (см. cases.json — там лежат 3 готовых кейса как пример).
 window.CASES_JSON_URL = window.IMAGES_BASE_URL + "cases.json";
+
+// Поддерживаем оба варианта: полная ссылка на картинку (https://...) или
+// просто имя файла из репозитория (тогда подставляем IMAGES_BASE_URL).
+window.resolveImageUrl = function(src){
+  if (!src) return '';
+  return /^https?:\/\//i.test(src) ? src : (window.IMAGES_BASE_URL + src);
+};
 </script>
 
 <script>
@@ -1080,13 +1077,12 @@ window.CASES_JSON_URL = window.IMAGES_BASE_URL + "cases.json";
   loadCases();
   loadFeed();
 
-  // Подгружаем базовые кейсы из cases.json. Делаем это только если у
-  // пользователя ещё нет сохранённых кейсов в localStorage (первый визит) —
-  // так мы не затираем уже созданные/отредактированные кейсы.
-  (async function seedCasesFromJSON(){
-    let alreadySaved = false;
-    try { alreadySaved = !!localStorage.getItem(CASES_DB_KEY); } catch(e){}
-    if (alreadySaved) return;
+  // Подгружаем базовые кейсы из cases.json при КАЖДОЙ загрузке страницы.
+  // Кейсы из JSON помечаются полем presetKey ("json:0", "json:1", ...) —
+  // по нему находим уже существующую копию и обновляем её (название, цвет,
+  // картинку, призы), а если такой ещё нет — добавляем. Кейсы без этого
+  // поля (созданные вручную через "+ Создать кейс") никогда не трогаем.
+  (async function syncPresetCasesFromJSON(){
     if (!window.CASES_JSON_URL) return;
     try {
       const res = await fetch(window.CASES_JSON_URL);
@@ -1094,25 +1090,47 @@ window.CASES_JSON_URL = window.IMAGES_BASE_URL + "cases.json";
       const data = await res.json();
       const list = Array.isArray(data.cases) ? data.cases : (Array.isArray(data) ? data : []);
       if (!list.length) return;
-      const seeded = list.map((c, i) => ({
-        id: i + 1,
-        name: c.name || ('КЕЙС ' + (i + 1)),
-        color: c.color || '#e4ae39',
-        image: c.image || '',
-        prizes: (Array.isArray(c.prizes) ? c.prizes : []).map((p, j) => ({
+
+      const cases = window.CASES_DB || [];
+      let changed = false;
+
+      list.forEach((c, i) => {
+        const presetKey = 'json:' + i;
+        const prizes = (Array.isArray(c.prizes) ? c.prizes : []).map((p, j) => ({
           id: j + 1,
           name: p.name,
           color: p.color || '#4b69ff',
           image: p.image || null,
           weight: p.weight || 10,
           qty: (p.qty === undefined) ? null : p.qty
-        }))
-      }));
-      window.CASES_DB = seeded;
-      saveCases();
-      window.dispatchEvent(new Event('cases-db-ready'));
+        }));
+        const existing = cases.find(x => x.presetKey === presetKey);
+        if (existing) {
+          existing.name = c.name || existing.name;
+          existing.color = c.color || existing.color;
+          existing.image = c.image || existing.image;
+          existing.prizes = prizes;
+        } else {
+          const newId = Math.max(0, ...cases.map(x => x.id)) + 1;
+          cases.push({
+            id: newId,
+            presetKey: presetKey,
+            name: c.name || ('КЕЙС ' + (i + 1)),
+            color: c.color || '#e4ae39',
+            image: c.image || '',
+            prizes: prizes
+          });
+        }
+        changed = true;
+      });
+
+      if (changed) {
+        window.CASES_DB = cases;
+        saveCases();
+        window.dispatchEvent(new Event('cases-db-ready'));
+      }
     } catch(e) {
-      // сеть недоступна / файл не найден — остаёмся на встроенном дефолтном кейсе
+      // сеть недоступна / файл не найден — остаёмся на том, что уже сохранено
     }
   })();
 
@@ -1291,7 +1309,7 @@ window.CASES_JSON_URL = window.IMAGES_BASE_URL + "cases.json";
   const caseSelectorList = document.getElementById('caseSelectorList');
   const caseDot = document.getElementById('caseDot');
   const caseNameDisplay = document.getElementById('caseNameDisplay');
-  const caseImageSelect = document.getElementById('caseImageSelect');
+  const caseImageInput = document.getElementById('caseImageInput');
 
   // ===== галерея выбора кейса (стартовый экран) =====
   const galleryGrid = document.getElementById('galleryGrid');
@@ -1299,7 +1317,7 @@ window.CASES_JSON_URL = window.IMAGES_BASE_URL + "cases.json";
   function galleryVisualEl(c){
     if (c.image){
       const img = document.createElement('img');
-      img.src = window.IMAGES_BASE_URL + c.image;
+      img.src = window.resolveImageUrl(c.image);
       img.alt = c.name;
       img.onerror = function(){
         const fb = document.createElement('div');
@@ -1336,13 +1354,8 @@ window.CASES_JSON_URL = window.IMAGES_BASE_URL + "cases.json";
       name.className = 'gallery-card-name';
       name.textContent = c.name;
 
-      const count = document.createElement('div');
-      count.className = 'gallery-card-count';
-      count.textContent = (c.prizes?.length || 0) + ' призов';
-
       card.appendChild(imgWrap);
       card.appendChild(name);
-      card.appendChild(count);
       card.addEventListener('click', ()=> chooseCaseFromGallery(c.id));
       galleryGrid.appendChild(card);
     });
@@ -1562,7 +1575,7 @@ window.CASES_JSON_URL = window.IMAGES_BASE_URL + "cases.json";
     // Обновить отображение текущего кейса
     caseNameDisplay.textContent = currentCase.name;
     caseDot.style.backgroundColor = currentCase.color;
-    if (caseImageSelect) caseImageSelect.value = currentCase.image || '';
+    if (caseImageInput) caseImageInput.value = currentCase.image || '';
   }
 
   // Картинка кейса (сундука) вместо стандартного ящика — показывается в
@@ -1573,7 +1586,7 @@ window.CASES_JSON_URL = window.IMAGES_BASE_URL + "cases.json";
     if (currentCase && currentCase.image){
       crateVisual.innerHTML = '';
       const img = document.createElement('img');
-      img.src = window.IMAGES_BASE_URL + currentCase.image;
+      img.src = window.resolveImageUrl(currentCase.image);
       img.alt = currentCase.name;
       img.onerror = function(){ crateVisual.innerHTML = defaultCrateMarkup; };
       crateVisual.appendChild(img);
@@ -1646,16 +1659,10 @@ window.CASES_JSON_URL = window.IMAGES_BASE_URL + "cases.json";
     opt.textContent = name;
     pImage.appendChild(opt);
   });
-  if (caseImageSelect){
-    available.forEach(name=>{
-      const opt = document.createElement('option');
-      opt.value = name;
-      opt.textContent = name;
-      caseImageSelect.appendChild(opt);
-    });
-    caseImageSelect.addEventListener('change', function(){
+  if (caseImageInput){
+    caseImageInput.addEventListener('change', function(){
       if (!currentCase) return;
-      window.CaseDB.updateCase(currentCase.id, { image: this.value });
+      window.CaseDB.updateCase(currentCase.id, { image: this.value.trim() });
       loadCurrentCase();
       renderGallery();
     });
@@ -1673,14 +1680,14 @@ window.CASES_JSON_URL = window.IMAGES_BASE_URL + "cases.json";
     const imgClass = kind === 'row' ? 'thumb-row' : (kind === 'feed' ? 'thumb' : (kind === 'strip' ? 'thumb' : 'reveal-thumb'));
     if(p.image){
       const img = document.createElement('img');
-      img.src = window.IMAGES_BASE_URL + p.image;
+      img.src = window.resolveImageUrl(p.image);
       img.alt = p.name;
       img.className = imgClass;
       img.title = p.image;
       img.onerror = function(){
         const dot = document.createElement('div');
         dot.className = dotClass;
-        dot.title = 'Картинка ' + p.image + ' не найдена по адресу ' + window.IMAGES_BASE_URL;
+        dot.title = 'Картинка не найдена: ' + p.image;
         img.replaceWith(dot);
       };
       return img;
