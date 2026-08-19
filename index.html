@@ -356,14 +356,8 @@
   .prize-row.editing{border-left-color:var(--accent);background:color-mix(in srgb, var(--accent) 8%, var(--panel-2));}
   .empty-msg{color:var(--text-dim);font-size:13px;text-align:center;padding:14px 0;}
 
-  /* ===== layout: основная колонка; лента теперь фиксирована (см. .side-feed) ===== */
+  /* ===== layout: основная колонка; лента открытий — полноширинный блок в потоке (см. .side-feed) ===== */
   .page{max-width:920px;margin:0 auto;}
-
-  /* на широких экранах резервируем место под фиксированную ленту справа,
-     чтобы контент кейса не заезжал под неё */
-  @media (min-width:1300px){
-    body{padding-right:356px;}
-  }
 
   /* ===== кнопка настроек (шестерёнка), фиксирована в левом верхнем углу ===== */
   .settings-fab{
@@ -478,20 +472,18 @@
   .settings-modal .panel{margin-bottom:16px;}
   .settings-modal .panel:last-child{margin-bottom:0;}
 
-  /* ===== боковая лента открытий (в духе кейс-баттлов) =====
-     фиксирована относительно окна — не крутится вместе со скроллом
-     страницы, всегда остаётся на месте у правого края экрана */
+  /* ===== лента открытий — теперь полноширинный блок в потоке страницы,
+     растягивается на всю ширину кейса (см. .wrap / .page) и пополняется
+     живыми открытиями всех игроков, приходящими с сервера ===== */
   .side-feed{
-    position:fixed;top:96px;right:28px;z-index:40;
-    width:300px;
-    background:linear-gradient(180deg, var(--panel), var(--panel-2));
-    border:1px solid var(--line);border-radius:8px;
-    padding:16px 14px 14px;
+    width:100%;
+    background:transparent;
+    border:none;border-radius:0;
+    padding:0;margin-top:36px;
     display:flex;flex-direction:column;
-    max-height:calc(100vh - 130px);
-    box-shadow:0 10px 40px rgba(0,0,0,.35);
+    box-shadow:none;
   }
-  .feed-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;}
+  .feed-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px;}
   .feed-title{display:flex;align-items:center;gap:8px;}
   .feed-title h2{margin:0;font-size:13px;text-transform:uppercase;letter-spacing:.14em;color:var(--text-dim);font-weight:700;}
   .live-dot{
@@ -507,7 +499,7 @@
     display:flex;align-items:center;justify-content:center;line-height:1;padding:0;
   }
   .feed-icon-btn:hover{border-color:var(--accent);color:var(--accent);}
-  .feed-status{font-size:10.5px;color:var(--accent);letter-spacing:.02em;margin:6px 0 10px;min-height:13px;}
+  .feed-status{font-size:10.5px;color:var(--accent);letter-spacing:.02em;margin:0 0 10px;min-height:13px;text-align:center;}
   .feed-status:empty{margin:0;}
   /* ===== выбор кейса в модалке - сетка 3 в ряд ===== */
   .case-selector-list{
@@ -556,66 +548,54 @@
   .case-btn.primary:hover{filter:brightness(1.1);}
   .feed-status:empty{margin:0;}
 
-  /* лента живая: содержимое непрерывно едет вверх и зацикливается,
-     новые открытия въезжают снизу — как на боевых лентах кейс-баттлов */
+  /* лента живая: полноширинные карточки одна под другой, новые открытия
+     (свои и чужие — приходят с сервера) добавляются сверху */
   .feed-track-wrap{
-    position:relative;overflow:hidden;
-    height:460px;
-    margin:8px -14px -14px;padding:0 14px 14px;
-    mask-image:linear-gradient(180deg,transparent,#000 16px,#000 calc(100% - 10px),transparent);
-    -webkit-mask-image:linear-gradient(180deg,transparent,#000 16px,#000 calc(100% - 10px),transparent);
+    position:relative;
+    border:1px solid var(--line);border-radius:8px;
+    overflow:hidden;
+    background:var(--panel);
   }
-  .feed-track-wrap:hover .feed-track{animation-play-state:paused;}
-  .feed-track{display:flex;flex-direction:column;gap:8px;padding-top:14px;}
-  .feed-track.scrolling{
-    animation-name:feedScroll;
-    animation-timing-function:linear;
-    animation-iteration-count:infinite;
-  }
-  @keyframes feedScroll{
-    from{transform:translateY(0);}
-    to{transform:translateY(var(--feed-shift, -50%));}
-  }
+  .feed-track{display:flex;flex-direction:column;}
 
   .feed-item{
-    display:flex;align-items:center;gap:10px;flex:0 0 auto;
+    position:relative;
+    display:flex;flex-direction:column;align-items:center;
+    gap:8px;text-align:center;
+    padding:20px 16px 16px;
+    border-bottom:1px solid var(--line);
+    border-left:4px solid var(--item-color, var(--accent));
     background:
-      radial-gradient(120% 100% at 0% 0%, color-mix(in srgb, var(--item-color, var(--accent)) 14%, transparent), transparent 60%),
+      radial-gradient(140% 120% at 50% 0%, color-mix(in srgb, var(--item-color, var(--accent)) 16%, transparent), transparent 65%),
       var(--panel-2);
-    border:1px solid var(--line);
-    border-left:3px solid var(--item-color, var(--accent));
-    padding:8px 10px;border-radius:6px;
-    transition:transform .15s ease, box-shadow .2s ease, border-color .2s ease;
+    transition:background .15s ease;
+    animation:feedItemIn .35s ease;
   }
-  .feed-item:hover{
-    transform:translateX(-2px);
-    box-shadow:0 4px 18px color-mix(in srgb, var(--item-color, var(--accent)) 25%, transparent);
+  .feed-item:last-child{border-bottom:none;}
+  .feed-item:hover{background:color-mix(in srgb, var(--item-color, var(--accent)) 10%, var(--panel-2));}
+  @keyframes feedItemIn{
+    from{opacity:0;transform:translateY(-8px);}
+    to{opacity:1;transform:translateY(0);}
   }
-  .feed-item .dot{width:26px;height:26px;border-radius:50%;background:var(--item-color, var(--accent));flex:0 0 auto;box-shadow:0 0 10px color-mix(in srgb, var(--item-color, var(--accent)) 60%, transparent);}
-  .feed-item .thumb{width:34px;height:34px;object-fit:cover;border-radius:6px;flex:0 0 auto;border:1px solid var(--item-color, var(--accent));box-shadow:0 0 10px color-mix(in srgb, var(--item-color, var(--accent)) 45%, transparent);}
-  .feed-item .fi-info{display:flex;flex-direction:column;gap:2px;line-height:1.25;min-width:0;flex:1;}
-  .feed-item .fi-name{font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .feed-item .fi-meta{font-size:10.5px;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .feed-item .dot{width:56px;height:56px;border-radius:50%;background:var(--item-color, var(--accent));flex:0 0 auto;box-shadow:0 0 16px color-mix(in srgb, var(--item-color, var(--accent)) 60%, transparent);}
+  .feed-item .thumb{width:80px;height:80px;object-fit:cover;border-radius:8px;flex:0 0 auto;border:1px solid var(--item-color, var(--accent));box-shadow:0 0 16px color-mix(in srgb, var(--item-color, var(--accent)) 45%, transparent);}
+  .feed-item .fi-info{display:flex;flex-direction:column;gap:3px;line-height:1.3;min-width:0;max-width:100%;}
+  .feed-item .fi-name{font-size:14px;font-weight:800;white-space:normal;word-break:break-word;}
+  .feed-item .fi-meta{font-size:11.5px;color:var(--text-dim);white-space:normal;word-break:break-word;}
   .feed-item .fi-time{
-    flex:0 0 auto;text-align:right;font-size:10px;color:var(--text-dim);line-height:1.3;
-    letter-spacing:.01em;padding-left:4px;
+    position:absolute;top:10px;right:14px;
+    text-align:right;font-size:10px;color:var(--text-dim);line-height:1.3;
+    letter-spacing:.01em;
   }
   .feed-item .fi-time .ft-date{opacity:.65;}
   .feed-item .fi-time .ft-clock{font-weight:700;color:var(--text);}
-  .feed-empty{padding:20px 8px;color:var(--text-dim);font-size:12.5px;text-align:center;}
+  .feed-empty{padding:30px 8px;color:var(--text-dim);font-size:12.5px;text-align:center;}
   .qty-badge{
     display:inline-block;margin-left:6px;font-size:10.5px;font-weight:700;
     color:var(--accent);border:1px solid var(--accent-dim);border-radius:10px;
     padding:1px 7px;vertical-align:middle;
   }
 
-  @media (max-width:1300px){
-    .side-feed{
-      position:static;width:auto;max-height:none;
-      margin-top:20px;top:auto;right:auto;
-    }
-    .feed-track-wrap{height:320px;}
-  }
   @media (max-width:560px){
     .settings-fab{top:12px;left:12px;width:38px;height:38px;font-size:16px;}
   }
@@ -1023,6 +1003,32 @@ window.resolveImageUrl = function(src){
     },
     isLoggedIn: function () { return !!authToken; },
     getCurrentUser: function () { return currentUser; },
+
+    // ===== общая лента открытий (D1, видна всем игрокам сайта) =====
+    addFeedEntry: async function (entry) {
+      try {
+        const res = await fetch(`${API_BASE_URL}/feed`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(entry),
+        });
+        if (!res.ok) return null;
+        return await res.json();
+      } catch (e) {
+        return null;
+      }
+    },
+    getFeed: async function (sinceId) {
+      try {
+        const qs = sinceId ? `?since=${encodeURIComponent(sinceId)}` : '?limit=60';
+        const res = await fetch(`${API_BASE_URL}/feed${qs}`);
+        if (!res.ok) return [];
+        const data = await res.json();
+        return Array.isArray(data) ? data : [];
+      } catch (e) {
+        return [];
+      }
+    },
   };
 
   loadAuth();
@@ -1902,22 +1908,19 @@ window.resolveImageUrl = function(src){
     return targetIndex;
   }
 
-  // ===== лента открытий: полностью на клиенте, БЕЗ сервера и БЕЗ =====
-  // ===== localStorage/sessionStorage. Живёт в памяти вкладки, пока  =====
-  // ===== страница открыта, а на диск сохраняется вручную кнопкой    =====
-  // ===== "Сохранить .txt" (обычный download файла браузером) и      =====
-  // ===== подгружается кнопкой "Загрузить .txt" (обычный <input      =====
-  // ===== type=file>). Формат .txt — простые строки с полями через   =====
-  // ===== табуляцию, без JSON, читается любым блокнотом.              =====
-  const FEED_MAX_SHOWN = 60;
-  const FEED_SPEED_PX_S = 26; // постоянная скорость живой ленты (px/сек по вертикали)
-  const FEED_FIELDS = ['id','ts','nickname','caseName','name','color','image','qty'];
-  const FEED_EMPTY = '-';
-  const FEED_HEADER = '# id\tдата_время\tник\tкейс\tприз\tцвет\tкартинка\tколичество';
+  // ===== лента открытий: общая для всех игроков сайта =====
+  // Каждое открытие кейса отправляется на Cloudflare Worker (POST /api/feed),
+  // который пишет запись в таблицу feed_entries в D1. При загрузке страницы
+  // подгружаются последние записи (GET /api/feed), а затем лента раз в
+  // несколько секунд опрашивает воркер на предмет новых открытий у ДРУГИХ
+  // игроков (GET /api/feed?since=<последний_известный_id>) и дорисовывает их.
+  const FEED_MAX_SHOWN = 80;
+  const FEED_POLL_MS = 4000;
 
-  let feedEntries = [];
-  let feedIdSeq = 1;
-  let feedDirty = false;
+  let feedEntries = [];       // отображаемые записи, от старых к новым
+  let feedKnownIds = new Set(); // id записей с сервера, уже показанных (без дублей)
+  let feedLastServerId = 0;   // максимальный id, полученный с сервера (для поллинга)
+  let feedPollTimer = null;
 
   function pad2(n){ return String(n).padStart(2,'0'); }
   function nowStamp(){
@@ -1932,41 +1935,6 @@ window.resolveImageUrl = function(src){
     const date = bits.length === 3 ? `${bits[2]}.${bits[1]}` : (datePart || '');
     const time = (timePart || '').slice(0, 5);
     return {date, time};
-  }
-
-  function escField(v){
-    let s = (v === null || v === undefined) ? '' : String(v);
-    s = s.replace(/\t/g, ' ').replace(/\r/g, ' ').replace(/\n/g, ' ').trim();
-    return s === '' ? FEED_EMPTY : s;
-  }
-
-  function entryToLine(e){
-    return [e.id, e.ts, e.nickname, e.caseName, e.name, e.color, e.image,
-            (e.qty === null || e.qty === undefined ? FEED_EMPTY : e.qty)]
-      .map(escField).join('\t');
-  }
-
-  function lineToEntry(line){
-    const parts = line.split('\t');
-    if(parts.length !== FEED_FIELDS.length) return null;
-    const id = parseInt(parts[0], 10);
-    if(!Number.isFinite(id)) return null;
-    const val = (s) => (s === FEED_EMPTY ? '' : s);
-    const qtyRaw = parts[7];
-    return {
-      id,
-      ts: val(parts[1]),
-      nickname: val(parts[2]) || 'Игрок',
-      caseName: val(parts[3]),
-      name: val(parts[4]),
-      color: val(parts[5]) || '#4b69ff',
-      image: val(parts[6]),
-      qty: qtyRaw === FEED_EMPTY ? null : (parseInt(qtyRaw, 10) || null)
-    };
-  }
-
-  function setFeedDirty(dirty){
-    feedDirty = dirty;
   }
 
   function feedItemNode(e){
@@ -2009,65 +1977,65 @@ window.resolveImageUrl = function(src){
     return el;
   }
 
-  // живая лента: пока записей мало и они целиком влезают в видимую
-  // область — список статичный, ничего не крутится. Как только записей
-  // становится слишком много и они перестают помещаться, включается
-  // бесшовная прокрутка (как раньше на боевых лентах кейс-баттлов)
+  // полноширинная лента: карточки одна под другой, самые новые сверху.
+  // Список приходит с сервера (см. initFeed/pollFeed ниже), здесь только
+  // отрисовка того, что уже лежит в feedEntries.
   function renderFeedTrack(){
-    feedTrack.classList.remove('scrolling');
-    feedTrack.style.removeProperty('--feed-shift');
-    feedTrack.style.removeProperty('animation-duration');
     feedTrack.innerHTML = '';
 
     if(feedEntries.length === 0){
       const empty = document.createElement('div');
       empty.className = 'feed-empty';
-      empty.textContent = 'Пока пусто — откройте кейс, или загрузите ранее сохранённый .txt';
+      empty.textContent = 'Пока пусто — откройте кейс первым';
       feedTrack.appendChild(empty);
       return;
     }
 
-    const list = feedEntries.slice(-FEED_MAX_SHOWN);
-
-    // сначала рисуем список один раз, чтобы измерить его настоящую высоту
+    // feedEntries хранится от старых к новым — на экране новые сверху
+    const list = feedEntries.slice(-FEED_MAX_SHOWN).slice().reverse();
     list.forEach(e => feedTrack.appendChild(feedItemNode(e)));
-    const viewportHeight = feedTrackWrap.clientHeight || 460;
-    const singleHeight = feedTrack.scrollHeight;
-
-    // список целиком помещается в видимую область — оставляем как есть,
-    // без анимации и без дублирования
-    if(singleHeight <= viewportHeight){
-      return;
-    }
-
-    // список не влезает — строим по-настоящему бесшовную прокрутку:
-    // повторяем список столько раз, чтобы одна "половина" ленты была не
-    // ниже видимой области — тогда в любой момент экран полностью закрыт
-    // контентом, и стык между половинами (в момент зацикливания) остаётся
-    // незаметным
-    const repeats = Math.max(2, Math.ceil(viewportHeight / Math.max(singleHeight, 1)) + 1);
-    feedTrack.innerHTML = '';
-    const buildHalf = () => {
-      for(let r = 0; r < repeats; r++){
-        list.forEach(e => feedTrack.appendChild(feedItemNode(e)));
-      }
-    };
-    buildHalf();
-    const halfHeight = feedTrack.scrollHeight;
-    buildHalf(); // вторая, идентичная половина — для бесшовного цикла
-
-    // скорость ленты постоянна (px/сек), не зависит от числа записей
-    const duration = Math.max(10, halfHeight / FEED_SPEED_PX_S);
-    feedTrack.style.setProperty('--feed-shift', `-${halfHeight}px`);
-    feedTrack.style.animationDuration = duration + 's';
-    void feedTrack.offsetWidth; // reflow, чтобы анимация стартовала заново с нуля
-    feedTrack.classList.add('scrolling');
   }
 
-  function addToFeed(winner){
-    const entry = {
-      id: feedIdSeq++,
-      ts: nowStamp(),
+  // Добавляет запись в отображаемый список, отбрасывая дубли по id записи
+  // с сервера (одно и то же открытие не должно появиться дважды — один раз
+  // как "своё", один раз при поллинге чужих открытий).
+  function mergeFeedEntries(list){
+    if(!Array.isArray(list) || !list.length) return false;
+    let added = false;
+    list.forEach(e=>{
+      if(e.id !== undefined && e.id !== null){
+        if(feedKnownIds.has(e.id)) return;
+        feedKnownIds.add(e.id);
+        if(typeof e.id === 'number') feedLastServerId = Math.max(feedLastServerId, e.id);
+      }
+      feedEntries.push(e);
+      added = true;
+    });
+    if(feedEntries.length > FEED_MAX_SHOWN * 2){
+      feedEntries = feedEntries.slice(-FEED_MAX_SHOWN);
+    }
+    return added;
+  }
+
+  // Первичная загрузка последних открытий всех игроков + запуск поллинга
+  // новых открытий (GET /api/feed?since=...), чтобы у всех на сайте лента
+  // пополнялась в реальном времени.
+  async function initFeed(){
+    const list = await API.getFeed();
+    if(mergeFeedEntries(list)) renderFeedTrack(); else renderFeedTrack();
+    if(feedPollTimer) clearInterval(feedPollTimer);
+    feedPollTimer = setInterval(async ()=>{
+      const fresh = await API.getFeed(feedLastServerId);
+      if(mergeFeedEntries(fresh)) renderFeedTrack();
+    }, FEED_POLL_MS);
+  }
+
+  // Открытие приза: сразу пишем в общую таблицу feed_entries через воркер
+  // (D1), чтобы запись увидели все, кто сейчас на сайте. Пока идёт запрос,
+  // показываем своё открытие локально; когда сервер подтвердит — заменяем
+  // его на настоящую запись с id, чтобы не задублировать при поллинге.
+  async function addToFeed(winner){
+    const payload = {
       nickname: (nickInput.value || '').trim() || 'Игрок',
       caseName: (caseNameInput.value || '').trim() || (currentCase ? currentCase.name : ''),
       name: winner.name,
@@ -2075,59 +2043,23 @@ window.resolveImageUrl = function(src){
       image: winner.image || '',
       qty: (winner.qty === null || winner.qty === undefined) ? null : winner.qty
     };
-    feedEntries.push(entry);
-    setFeedDirty(true);
+
+    const localEntry = { ...payload, id: null, ts: nowStamp() };
+    feedEntries.push(localEntry);
     renderFeedTrack();
-    // Отправить в API (отключено - используем только localStorage)
-    // if (API.isLoggedIn()){
-    //   API.addFeedEntry(entry).catch(err => console.error('Failed to add feed entry:', err));
-    // }
-  }
 
-  function exportFeed(){
-    const lines = feedEntries.map(entryToLine);
-    const text = FEED_HEADER + '\n' + lines.join('\n') + (lines.length ? '\n' : '');
-    const blob = new Blob([text], {type: 'text/plain;charset=utf-8'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'feed.txt';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-    setFeedDirty(false);
-  }
-
-  function importFeedFile(file){
-    if(!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const text = String(reader.result || '');
-      const loaded = [];
-      text.split(/\r?\n/).forEach(line => {
-        if(!line || line.startsWith('#')) return;
-        const e = lineToEntry(line);
-        if(e) loaded.push(e);
-      });
-      feedEntries = loaded;
-      feedIdSeq = loaded.reduce((m, e) => Math.max(m, e.id || 0), 0) + 1;
-      setFeedDirty(false);
+    const saved = await API.addFeedEntry(payload);
+    if(saved && saved.id !== undefined && saved.id !== null){
+      const idx = feedEntries.indexOf(localEntry);
+      if(idx !== -1) feedEntries.splice(idx, 1);
+      mergeFeedEntries([saved]);
       renderFeedTrack();
-    };
-    reader.onerror = () => {
-      console.warn('feed import: не удалось прочитать файл');
-    };
-    reader.readAsText(file, 'utf-8');
+    }
+    // если сервер недоступен — открытие всё равно останется видно локально
+    // (localEntry), просто не попадёт в общую ленту для других игроков.
   }
 
-  renderFeedTrack();
-
-  let feedResizeTimer = null;
-  window.addEventListener('resize', () => {
-    clearTimeout(feedResizeTimer);
-    feedResizeTimer = setTimeout(renderFeedTrack, 200);
-  });
+  initFeed();
 
   // custom easing for the reel: keeps the strip visibly moving through most
   // of the spin (matching the steady rattle in the audio track) instead of
