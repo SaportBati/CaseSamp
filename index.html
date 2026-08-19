@@ -921,9 +921,18 @@ window.CASES_JSON_URL = window.IMAGES_BASE_URL + "cases.json";
 
 // Поддерживаем оба варианта: полная ссылка на картинку (https://...) или
 // просто имя файла из репозитория (тогда подставляем IMAGES_BASE_URL).
+// Ссылку вида "github.com/USER/REPO/blob/BRANCH/файл.png?raw=true" (это
+// адрес страницы просмотра файла на GitHub, не самого файла) превращаем в
+// настоящую прямую ссылку на raw.githubusercontent.com — так картинка
+// гарантированно отдаётся браузеру как файл, без редиректов и HTML-обёртки.
 window.resolveImageUrl = function(src){
   if (!src) return '';
-  return /^https?:\/\//i.test(src) ? src : (window.IMAGES_BASE_URL + src);
+  let url = src.trim();
+  const blobMatch = url.match(/^https?:\/\/github\.com\/([^\/]+)\/([^\/]+)\/blob\/([^?]+)/i);
+  if (blobMatch){
+    url = `https://raw.githubusercontent.com/${blobMatch[1]}/${blobMatch[2]}/${blobMatch[3]}`;
+  }
+  return /^https?:\/\//i.test(url) ? url : (window.IMAGES_BASE_URL + url);
 };
 </script>
 
@@ -1320,6 +1329,7 @@ window.resolveImageUrl = function(src){
       img.src = window.resolveImageUrl(c.image);
       img.alt = c.name;
       img.onerror = function(){
+        console.warn('[кейсы] не удалось загрузить картинку кейса "' + c.name + '":', img.src);
         const fb = document.createElement('div');
         fb.className = 'gallery-card-fallback';
         fb.textContent = '📦';
@@ -1588,7 +1598,10 @@ window.resolveImageUrl = function(src){
       const img = document.createElement('img');
       img.src = window.resolveImageUrl(currentCase.image);
       img.alt = currentCase.name;
-      img.onerror = function(){ crateVisual.innerHTML = defaultCrateMarkup; };
+      img.onerror = function(){
+        console.warn('[кейсы] не удалось загрузить картинку кейса "' + currentCase.name + '":', img.src);
+        crateVisual.innerHTML = defaultCrateMarkup;
+      };
       crateVisual.appendChild(img);
     } else {
       crateVisual.innerHTML = defaultCrateMarkup;
