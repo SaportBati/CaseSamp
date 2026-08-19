@@ -487,12 +487,10 @@
     position:fixed;top:0;right:0;bottom:0;z-index:45;
     width:400px;height:100vh;
     display:flex;flex-direction:column;
-    background:var(--panel);
-    border-left:1px solid var(--line);
-    border-radius:0;
-    padding:24px 20px;box-shadow:-20px 0 50px rgba(0,0,0,.35);
+    background:transparent;
+    border:none;
+    padding:0;
   }
-  .feed-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:16px;flex:0 0 auto;}
   .feed-title{display:flex;align-items:center;gap:8px;}
   .feed-title h2{margin:0;font-size:13px;text-transform:uppercase;letter-spacing:.14em;color:var(--text-dim);font-weight:700;}
   .live-dot{
@@ -561,9 +559,9 @@
      новые открытия (свои и чужие — приходят с сервера) добавляются сверху */
   .feed-track-wrap{
     position:relative;flex:1 1 auto;min-height:0;
-    border:1px solid var(--line);border-radius:8px;
+    border:none;border-radius:0;
     overflow:hidden;
-    background:var(--panel);
+    background:transparent;
   }
   .feed-track{display:flex;flex-direction:column;}
   /* когда карточки не влезают в видимую область, лента дублируется и
@@ -920,12 +918,6 @@
 <!-- лента открытий — постоянная панель справа; вынесена за пределы .page,
      поэтому остаётся видимой и в галерее выбора кейса, и внутри кейса -->
 <aside class="side-feed" id="sideFeed">
-  <div class="feed-head">
-    <div class="feed-title">
-      <span class="live-dot"></span>
-      <h2>Лента открытий</h2>
-    </div>
-  </div>
   <div class="feed-track-wrap" id="feedTrackWrap">
     <div class="feed-track" id="feedTrack"></div>
   </div>
