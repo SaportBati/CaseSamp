@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Админ-панель</title>
+<style>
+  :root{
+    --accent:#e4ae39; --accent-dim:#7a5b1c;
+    --bg:#0b0c10; --panel:#15171d; --panel-2:#1c1f27; --line:#2a2d37;
+    --text:#eceef2; --text-dim:#8b8f9c; --danger:#eb4b4b; --ok:#4be07a;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:radial-gradient(ellipse 900px 500px at 50% -10%, color-mix(in srgb, var(--accent) 18%, transparent), transparent), var(--bg);
+    color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    min-height:100vh; padding:32px 16px 80px;
+  }
+  .wrap{max-width:1100px;margin:0 auto;}
+  a{color:var(--accent);}
+
+  /* ===== auth ===== */
+  .auth-overlay{
+    position:fixed;inset:0;z-index:200;
+    background:radial-gradient(ellipse 900px 500px at 50% -10%, color-mix(in srgb, var(--accent) 18%, transparent), transparent), var(--bg);
+    display:flex;align-items:center;justify-content:center;padding:20px;
+  }
+  body.authed .auth-overlay{display:none;}
+  .auth-box{width:min(360px,100%);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:28px 26px 24px;box-shadow:0 20px 60px rgba(0,0,0,.5);}
+  .auth-box h1{margin:0 0 4px;font-size:15px;text-transform:uppercase;letter-spacing:.14em;color:var(--accent);font-weight:800;text-align:center;}
+  .auth-box p{margin:0 0 22px;font-size:12px;color:var(--text-dim);text-align:center;}
+  .auth-field{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
+  .auth-field label{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);}
+  .auth-field input{background:var(--panel-2);border:1px solid var(--line);color:var(--text);padding:10px 12px;border-radius:4px;font-size:14px;width:100%;}
+  .auth-field input:focus{outline:none;border-color:var(--accent);}
+  .auth-error{color:var(--danger);font-size:12px;min-height:16px;margin:-4px 0 12px;text-align:center;}
+  .auth-submit{width:100%;background:var(--accent);border:none;color:#141414;padding:11px 18px;border-radius:4px;font-weight:800;text-transform:uppercase;font-size:13px;letter-spacing:.05em;cursor:pointer;}
+  .auth-submit:hover{filter:brightness(1.08);}
+  .auth-submit:disabled{opacity:.6;cursor:not-allowed;}
+
+  /* ===== shell ===== */
+  body:not(.authed) .shell{display:none;}
+  .topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:26px;flex-wrap:wrap;gap:12px;}
+  .topbar h1{font-size:clamp(20px,3vw,28px);font-weight:900;text-transform:uppercase;letter-spacing:.03em;margin:0;}
+  .topbar .who{font-size:12.5px;color:var(--text-dim);}
+  .topbar .who b{color:var(--accent);}
+  .logout-btn{background:var(--panel-2);border:1px solid var(--line);color:var(--text);padding:8px 16px;border-radius:4px;font-size:12.5px;font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:.04em;}
+  .logout-btn:hover{border-color:var(--danger);color:var(--danger);}
+
+  .tabs{display:flex;gap:8px;margin-bottom:22px;border-bottom:1px solid var(--line);}
+  .tab-btn{background:transparent;border:none;color:var(--text-dim);padding:11px 18px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;cursor:pointer;border-bottom:2px solid transparent;}
+  .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:20px 22px;margin-bottom:18px;}
+  .panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.12em;color:var(--text-dim);margin:0 0 16px;font-weight:700;}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
+  .field{display:flex;flex-direction:column;gap:6px;flex:0 0 auto;}
+  .field label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-dim);white-space:nowrap;}
+  .field input[type=text], .field input[type=password], .field input[type=number], .field input[type=url]{
+    background:var(--panel-2);border:1px solid var(--line);color:var(--text);padding:9px 10px;border-radius:4px;font-size:14px;
+  }
+  .field input:focus{outline:none;border-color:var(--accent);}
+  .checkbox-field{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text);}
+  .checkbox-field input{width:16px;height:16px;}
+
+  .btn{background:var(--panel-2);border:1px solid var(--line);color:var(--text);padding:9px 18px;border-radius:4px;font-weight:700;text-transform:uppercase;font-size:12.5px;letter-spacing:.05em;cursor:pointer;white-space:nowrap;}
+  .btn:hover{border-color:var(--accent);color:var(--accent);}
+  .btn.primary{background:var(--accent);color:#161616;border-color:var(--accent);}
+  .btn.primary:hover{filter:brightness(1.1);color:#161616;}
+  .btn.danger:hover{border-color:var(--danger);color:var(--danger);}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+  .btn.small{padding:6px 12px;font-size:11px;}
+
+  .status-msg{font-size:12.5px;margin:10px 0 0;min-height:16px;}
+  .status-msg.ok{color:var(--ok);}
+  .status-msg.err{color:var(--danger);}
+
+  /* ===== users table ===== */
+  table{width:100%;border-collapse:collapse;margin-top:6px;}
+  th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--text-dim);padding:8px 10px;border-bottom:1px solid var(--line);}
+  td{padding:10px;border-bottom:1px solid var(--line);font-size:13.5px;vertical-align:middle;}
+  tr:last-child td{border-bottom:none;}
+  .badge{display:inline-block;font-size:10.5px;font-weight:800;padding:2px 9px;border-radius:10px;text-transform:uppercase;letter-spacing:.04em;}
+  .badge.admin{background:color-mix(in srgb, var(--accent) 22%, transparent);color:var(--accent);border:1px solid var(--accent-dim);}
+  .badge.user{background:var(--panel-2);color:var(--text-dim);border:1px solid var(--line);}
+  .pw-toggle{background:transparent;border:none;color:var(--text-dim);cursor:pointer;font-size:13px;font-family:monospace;letter-spacing:2px;}
+  .pw-toggle:hover{color:var(--accent);}
+  .pw-reset-form{display:flex;gap:6px;align-items:center;margin-top:6px;}
+  .pw-reset-form input{width:140px;background:var(--panel-2);border:1px solid var(--line);color:var(--text);padding:6px 8px;border-radius:4px;font-size:12.5px;}
+  .row-actions{display:flex;gap:6px;flex-wrap:wrap;}
+  .login-edit{background:var(--panel-2);border:1px solid var(--line);color:var(--text);padding:6px 8px;border-radius:4px;font-size:13px;width:140px;}
+
+  /* ===== cases ===== */
+  .case-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;align-items:flex-end;}
+  .case-list{display:flex;flex-direction:column;gap:12px;}
+  .case-card{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--case-color,var(--accent));border-radius:6px;overflow:hidden;}
+  .case-card-head{display:flex;align-items:center;gap:14px;padding:14px 18px;cursor:pointer;}
+  .case-card-head .swatch{width:16px;height:16px;border-radius:50%;background:var(--case-color,var(--accent));flex:0 0 auto;}
+  .case-card-head .cname{font-weight:800;font-size:14.5px;flex:1;}
+  .case-card-head .cstats{font-size:12px;color:var(--text-dim);}
+  .case-card-body{display:none;padding:0 18px 18px;border-top:1px solid var(--line);}
+  .case-card.open .case-card-body{display:block;}
+  .case-card.open .case-card-head{border-bottom:1px solid var(--line);}
+
+  .prize-row{display:flex;align-items:center;gap:10px;background:var(--panel-2);border:1px solid var(--line);border-left:3px solid var(--row-color,var(--accent));padding:8px 12px;border-radius:4px;margin-bottom:7px;}
+  .prize-row .dot{width:14px;height:14px;border-radius:50%;background:var(--row-color,var(--accent));flex:0 0 auto;}
+  .prize-row .pn{flex:1;font-size:13.5px;font-weight:600;}
+  .prize-row .pw{font-size:11.5px;color:var(--text-dim);width:64px;text-align:right;}
+  .prize-row .pq{font-size:11px;color:var(--accent);width:44px;text-align:right;}
+  .prize-row button{background:transparent;border:none;color:var(--text-dim);cursor:pointer;font-size:14px;padding:3px 5px;}
+  .prize-row button:hover{color:var(--accent);}
+  .prize-row button.rm:hover{color:var(--danger);}
+  .empty-msg{color:var(--text-dim);font-size:12.5px;text-align:center;padding:14px 0;}
+</style>
+</head>
+<body>
+
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-box">
+    <h1>Админ-панель</h1>
+    <p>Войдите аккаунтом с правами администратора</p>
+    <form id="authForm" autocomplete="off">
+      <div class="auth-field">
+        <label>Логин</label>
+        <input type="text" id="authLogin" autocomplete="username" autofocus>
+      </div>
+      <div class="auth-field">
+        <label>Пароль</label>
+        <input type="password" id="authPassword" autocomplete="current-password">
+      </div>
+      <div class="auth-error" id="authError"></div>
+      <button type="submit" class="auth-submit" id="authSubmit">Войти</button>
+    </form>
+  </div>
+</div>
+
+<div class="wrap shell">
+  <div class="topbar">
+    <h1>Админ-панель</h1>
+    <div style="display:flex;align-items:center;gap:14px;">
+      <span class="who">Вы вошли как <b id="whoAmI"></b></span>
+      <button type="button" class="logout-btn" id="btnLogout">Выйти</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button type="button" class="tab-btn active" data-tab="users">Аккаунты</button>
+    <button type="button" class="tab-btn" data-tab="cases">Кейсы</button>
+  </div>
+
+  <!-- ===== ACCOUNTS ===== -->
+  <div class="tab-panel active" id="tab-users">
+    <div class="panel">
+      <h2>Создать аккаунт</h2>
+      <div class="row">
+        <div class="field"><label>Логин</label><input type="text" id="newLogin" placeholder="login"></div>
+        <div class="field"><label>Пароль</label><input type="text" id="newPassword" placeholder="мин. 6 символов"></div>
+        <div class="field checkbox-field" style="padding-bottom:9px;">
+          <input type="checkbox" id="newIsAdmin"><label for="newIsAdmin" style="text-transform:none;letter-spacing:0;font-size:13px;">Права администратора</label>
+        </div>
+        <button type="button" class="btn primary" id="btnCreateUser">Создать</button>
+      </div>
+      <div class="status-msg" id="userCreateStatus"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Все аккаунты</h2>
+      <p style="font-size:12px;color:var(--text-dim);margin:-8px 0 14px;">
+        Пароли хранятся как необратимый хеш (PBKDF2) — показать существующий пароль нельзя,
+        только задать новый.
+      </p>
+      <table>
+        <thead><tr><th>Логин</th><th>Пароль</th><th>Роль</th><th>Создан</th><th>Действия</th></tr></thead>
+        <tbody id="usersTableBody"></tbody>
+      </table>
+      <div class="status-msg" id="usersStatus"></div>
+    </div>
+  </div>
+
+  <!-- ===== CASES ===== -->
+  <div class="tab-panel" id="tab-cases">
+    <div class="panel">
+      <h2>Кейсы</h2>
+      <div class="case-toolbar">
+        <button type="button" class="btn primary" id="btnNewCase">+ Создать кейс</button>
+        <div class="field"><label>Импорт из JSON (URL)</label><input type="url" id="importUrl" style="width:340px;" value="https://raw.githubusercontent.com/SaportBati/huinya/refs/heads/main/cases.json"></div>
+        <button type="button" class="btn" id="btnImport">Импортировать</button>
+      </div>
+      <div class="status-msg" id="casesStatus"></div>
+      <div class="case-list" id="caseList"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API_BASE_URL = 'https://curly-tooth-4ec5.aaf60251.workers.dev/api';
+
+let token = null;
+let me = null;
+
+function authHeaders(){
+  const h = { 'Content-Type': 'application/json' };
+  if (token) h['Authorization'] = 'Bearer ' + token;
+  return h;
+}
+
+async function api(path, opts){
+  opts = opts || {};
+  const res = await fetch(API_BASE_URL + path, {
+    method: opts.method || 'GET',
+    headers: authHeaders(),
+    body: opts.body ? JSON.stringify(opts.body) : undefined,
+  });
+  let data = null;
+  try { data = await res.json(); } catch(e){}
+  if (!res.ok){
+    throw new Error((data && data.error) ? data.error : ('HTTP ' + res.status));
+  }
+  return data;
+}
+
+function setStatus(el, msg, isErr){
+  el.textContent = msg || '';
+  el.className = 'status-msg ' + (isErr ? 'err' : (msg ? 'ok' : ''));
+}
+
+/* ================= AUTH ================= */
+
+const authOverlay = document.getElementById('authOverlay');
+const authForm = document.getElementById('authForm');
+const authLogin = document.getElementById('authLogin');
+const authPassword = document.getElementById('authPassword');
+const authError = document.getElementById('authError');
+const authSubmit = document.getElementById('authSubmit');
+const whoAmI = document.getElementById('whoAmI');
+const btnLogout = document.getElementById('btnLogout');
+
+function saveSession(t, user){
+  token = t; me = user;
+  try{
+    localStorage.setItem('case_opener_token', t);
+    localStorage.setItem('case_opener_user', JSON.stringify(user));
+  }catch(e){}
+}
+
+function clearSession(){
+  token = null; me = null;
+  try{
+    localStorage.removeItem('case_opener_token');
+    localStorage.removeItem('case_opener_user');
+  }catch(e){}
+}
+
+async function tryRestoreSession(){
+  try{
+    const t = localStorage.getItem('case_opener_token');
+    if (!t) return false;
+    token = t;
+    const profile = await api('/auth/profile');
+    if (!profile.isAdmin){
+      authError.textContent = 'У этого аккаунта нет прав администратора';
+      clearSession();
+      return false;
+    }
+    me = profile;
+    return true;
+  }catch(e){
+    clearSession();
+    return false;
+  }
+}
+
+async function enterApp(){
+  document.body.classList.add('authed');
+  whoAmI.textContent = me.login;
+  await Promise.all([loadUsers(), loadCases()]);
+}
+
+authForm.addEventListener('submit', async function(e){
+  e.preventDefault();
+  authError.textContent = '';
+  authSubmit.disabled = true;
+  try{
+    const res = await fetch(API_BASE_URL + '/auth/login', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ login: authLogin.value.trim(), password: authPassword.value })
+    });
+    const data = await res.json();
+    if (!res.ok || !data.token){
+      authError.textContent = (data && data.error) ? data.error : 'Неверный логин или пароль';
+      authSubmit.disabled = false;
+      return;
+    }
+    if (!data.user || !data.user.isAdmin){
+      authError.textContent = 'У этого аккаунта нет прав администратора';
+      authSubmit.disabled = false;
+      return;
+    }
+    saveSession(data.token, data.user);
+    await enterApp();
+  }catch(err){
+    authError.textContent = 'Не удалось связаться с сервером';
+  }
+  authSubmit.disabled = false;
+});
+
+btnLogout.addEventListener('click', function(){
+  clearSession();
+  document.body.classList.remove('authed');
+  authLogin.value=''; authPassword.value=''; authError.textContent='';
+});
+
+/* ================= TABS ================= */
+
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+  });
+});
+
+/* ================= USERS ================= */
+
+const usersTableBody = document.getElementById('usersTableBody');
+const usersStatus = document.getElementById('usersStatus');
+let usersCache = [];
+let revealedPwId = null;
+
+async function loadUsers(){
+  try{
+    usersCache = await api('/admin/users');
+    renderUsers();
+  }catch(e){
+    setStatus(usersStatus, 'Ошибка загрузки: ' + e.message, true);
+  }
+}
+
+function renderUsers(){
+  usersTableBody.innerHTML = '';
+  usersCache.forEach(u=>{
+    const tr = document.createElement('tr');
+
+    const tdLogin = document.createElement('td');
+    tdLogin.innerHTML = '<span class="login-view">' + escapeHtml(u.login) + '</span>';
+    tr.appendChild(tdLogin);
+
+    const tdPw = document.createElement('td');
+    if (revealedPwId === u.id){
+      const wrap = document.createElement('div');
+      const form = document.createElement('div');
+      form.className = 'pw-reset-form';
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.placeholder = 'новый пароль';
+      const save = document.createElement('button');
+      save.className = 'btn small primary';
+      save.type = 'button';
+      save.textContent = 'Сохранить';
+      save.onclick = async ()=>{
+        if (input.value.length < 6){ setStatus(usersStatus, 'Пароль минимум 6 символов', true); return; }
+        try{
+          await api('/admin/users/' + u.id, { method:'PUT', body:{ password: input.value } });
+          setStatus(usersStatus, 'Пароль для «' + u.login + '» обновлён');
+          revealedPwId = null;
+          renderUsers();
+        }catch(e){ setStatus(usersStatus, e.message, true); }
+      };
+      const cancel = document.createElement('button');
+      cancel.className = 'btn small';
+      cancel.type = 'button';
+      cancel.textContent = 'Отмена';
+      cancel.onclick = ()=>{ revealedPwId = null; renderUsers(); };
+      form.appendChild(input); form.appendChild(save); form.appendChild(cancel);
+      wrap.innerHTML = '<div style="font-size:11px;color:var(--text-dim);margin-bottom:2px;">хеш скрыт — задайте новый пароль</div>';
+      wrap.appendChild(form);
+      tdPw.appendChild(wrap);
+    } else {
+      const btn = document.createElement('button');
+      btn.className = 'pw-toggle';
+      btn.type = 'button';
+      btn.textContent = '••••••  сменить';
+      btn.onclick = ()=>{ revealedPwId = u.id; renderUsers(); };
+      tdPw.appendChild(btn);
+    }
+    tr.appendChild(tdPw);
+
+    const tdRole = document.createElement('td');
+    const badge = document.createElement('span');
+    badge.className = 'badge ' + (u.isAdmin ? 'admin' : 'user');
+    badge.textContent = u.isAdmin ? 'Админ' : 'Пользователь';
+    tdRole.appendChild(badge);
+    tr.appendChild(tdRole);
+
+    const tdCreated = document.createElement('td');
+    tdCreated.textContent = (u.createdAt || '').replace('T',' ').slice(0,16);
+    tr.appendChild(tdCreated);
+
+    const tdActions = document.createElement('td');
+    const actions = document.createElement('div');
+    actions.className = 'row-actions';
+
+    const btnRole = document.createElement('button');
+    btnRole.className = 'btn small';
+    btnRole.type = 'button';
+    btnRole.textContent = u.isAdmin ? 'Забрать админку' : 'Сделать админом';
+    btnRole.onclick = async ()=>{
+      try{
+        await api('/admin/users/' + u.id, { method:'PUT', body:{ isAdmin: !u.isAdmin } });
+        setStatus(usersStatus, 'Роль обновлена для «' + u.login + '»');
+        loadUsers();
+      }catch(e){ setStatus(usersStatus, e.message, true); }
+    };
+
+    const btnRename = document.createElement('button');
+    btnRename.className = 'btn small';
+    btnRename.type = 'button';
+    btnRename.textContent = 'Логин';
+    btnRename.onclick = async ()=>{
+      const val = prompt('Новый логин для «' + u.login + '»:', u.login);
+      if (!val || !val.trim() || val.trim() === u.login) return;
+      try{
+        await api('/admin/users/' + u.id, { method:'PUT', body:{ login: val.trim() } });
+        setStatus(usersStatus, 'Логин обновлён');
+        loadUsers();
+      }catch(e){ setStatus(usersStatus, e.message, true); }
+    };
+
+    const btnDelete = document.createElement('button');
+    btnDelete.className = 'btn small danger';
+    btnDelete.type = 'button';
+    btnDelete.textContent = 'Удалить';
+    btnDelete.disabled = (me && u.id === me.id);
+    btnDelete.onclick = async ()=>{
+      if (!confirm('Удалить аккаунт «' + u.login + '»?')) return;
+      try{
+        await api('/admin/users/' + u.id, { method:'DELETE' });
+        setStatus(usersStatus, 'Аккаунт «' + u.login + '» удалён');
+        loadUsers();
+      }catch(e){ setStatus(usersStatus, e.message, true); }
+    };
+
+    actions.appendChild(btnRole);
+    actions.appendChild(btnRename);
+    actions.appendChild(btnDelete);
+    tdActions.appendChild(actions);
+    tr.appendChild(tdActions);
+
+    usersTableBody.appendChild(tr);
+  });
+
+  if (!usersCache.length){
+    usersTableBody.innerHTML = '<tr><td colspan="5" class="empty-msg">Аккаунтов пока нет</td></tr>';
+  }
+}
+
+document.getElementById('btnCreateUser').addEventListener('click', async ()=>{
+  const login = document.getElementById('newLogin').value.trim();
+  const password = document.getElementById('newPassword').value;
+  const isAdmin = document.getElementById('newIsAdmin').checked;
+  const statusEl = document.getElementById('userCreateStatus');
+  if (!login || !password){ setStatus(statusEl, 'Заполните логин и пароль', true); return; }
+  try{
+    await api('/admin/users', { method:'POST', body:{ login, password, isAdmin } });
+    setStatus(statusEl, 'Аккаунт «' + login + '» создан');
+    document.getElementById('newLogin').value = '';
+    document.getElementById('newPassword').value = '';
+    document.getElementById('newIsAdmin').checked = false;
+    loadUsers();
+  }catch(e){ setStatus(statusEl, e.message, true); }
+});
+
+/* ================= CASES ================= */
+
+const caseList = document.getElementById('caseList');
+const casesStatus = document.getElementById('casesStatus');
+let casesCache = [];
+let openCaseId = null;
+
+async function loadCases(){
+  try{
+    casesCache = await api('/cases');
+    renderCases();
+  }catch(e){
+    setStatus(casesStatus, 'Ошибка загрузки: ' + e.message, true);
+  }
+}
+
+function escapeHtml(s){
+  return (s||'').toString().replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function renderCases(){
+  caseList.innerHTML = '';
+  if (!casesCache.length){
+    caseList.innerHTML = '<div class="empty-msg">Кейсов пока нет — создайте новый или импортируйте из JSON</div>';
+    return;
+  }
+  casesCache.forEach(c=>{
+    const card = document.createElement('div');
+    card.className = 'case-card' + (openCaseId === c.id ? ' open' : '');
+    card.style.setProperty('--case-color', c.color || '#e4ae39');
+
+    const head = document.createElement('div');
+    head.className = 'case-card-head';
+    head.innerHTML =
+      '<span class="swatch"></span>' +
+      '<span class="cname">' + escapeHtml(c.name) + '</span>' +
+      '<span class="cstats">' + (c.prizes ? c.prizes.length : 0) + ' призов</span>';
+    head.addEventListener('click', ()=>{
+      openCaseId = (openCaseId === c.id) ? null : c.id;
+      renderCases();
+    });
+
+    const body = document.createElement('div');
+    body.className = 'case-card-body';
+    if (openCaseId === c.id){
+      body.appendChild(buildCaseEditor(c));
+    }
+
+    card.appendChild(head);
+    card.appendChild(body);
+    caseList.appendChild(card);
+  });
+}
+
+function buildCaseEditor(c){
+  const wrap = document.createElement('div');
+  wrap.style.paddingTop = '16px';
+
+  // --- case fields ---
+  const row = document.createElement('div');
+  row.className = 'row';
+  row.style.marginBottom = '14px';
+
+  const fName = document.createElement('div'); fName.className = 'field';
+  fName.innerHTML = '<label>Название</label>';
+  const inName = document.createElement('input'); inName.type='text'; inName.value = c.name;
+  fName.appendChild(inName);
+
+  const fColor = document.createElement('div'); fColor.className = 'field';
+  fColor.innerHTML = '<label>Цвет</label>';
+  const inColor = document.createElement('input'); inColor.type='text'; inColor.value = c.color || '#e4ae39'; inColor.style.width='90px';
+  fColor.appendChild(inColor);
+
+  const fImage = document.createElement('div'); fImage.className = 'field'; fImage.style.flex='1 1 220px';
+  fImage.innerHTML = '<label>Картинка кейса (URL)</label>';
+  const inImage = document.createElement('input'); inImage.type='text'; inImage.value = c.image || ''; inImage.style.width='100%';
+  fImage.appendChild(inImage);
+
+  const btnSaveCase = document.createElement('button');
+  btnSaveCase.className = 'btn primary'; btnSaveCase.type='button'; btnSaveCase.textContent = 'Сохранить кейс';
+  btnSaveCase.onclick = async ()=>{
+    try{
+      await api('/admin/cases/' + c.id, { method:'PUT', body:{ name: inName.value.trim(), color: inColor.value.trim(), image: inImage.value.trim() } });
+      setStatus(casesStatus, 'Кейс сохранён');
+      loadCases();
+    }catch(e){ setStatus(casesStatus, e.message, true); }
+  };
+
+  const btnDeleteCase = document.createElement('button');
+  btnDeleteCase.className = 'btn danger'; btnDeleteCase.type='button'; btnDeleteCase.textContent = 'Удалить кейс';
+  btnDeleteCase.onclick = async ()=>{
+    if (!confirm('Удалить кейс «' + c.name + '» вместе со всеми призами?')) return;
+    try{
+      await api('/admin/cases/' + c.id, { method:'DELETE' });
+      openCaseId = null;
+      setStatus(casesStatus, 'Кейс удалён');
+      loadCases();
+    }catch(e){ setStatus(casesStatus, e.message, true); }
+  };
+
+  row.appendChild(fName); row.appendChild(fColor); row.appendChild(fImage);
+  row.appendChild(btnSaveCase); row.appendChild(btnDeleteCase);
+  wrap.appendChild(row);
+
+  // --- prize add form ---
+  const pRow = document.createElement('div');
+  pRow.className = 'row';
+  pRow.style.marginBottom = '12px';
+
+  const mk = (labelText, type, val, w) => {
+    const f = document.createElement('div'); f.className='field';
+    f.innerHTML = '<label>' + labelText + '</label>';
+    const inp = document.createElement('input'); inp.type = type; if (val!==undefined) inp.value = val;
+    if (w) inp.style.width = w;
+    f.appendChild(inp);
+    return { f, inp };
+  };
+
+  const pName = mk('Название приза','text','','200px');
+  const pColor = mk('Цвет','text','#4b69ff','90px');
+  const pImage = mk('Картинка (URL)','text','','200px');
+  const pWeight = mk('Шанс','number','10','70px');
+  const pQty = mk('Кол-во','number','','70px');
+
+  const btnAddPrize = document.createElement('button');
+  btnAddPrize.className = 'btn primary'; btnAddPrize.type='button'; btnAddPrize.textContent='+ Приз';
+  btnAddPrize.onclick = async ()=>{
+    const name = pName.inp.value.trim();
+    if (!name) { pName.inp.focus(); return; }
+    try{
+      await api('/admin/cases/' + c.id + '/prizes', { method:'POST', body:{
+        name, color: pColor.inp.value.trim() || '#4b69ff', image: pImage.inp.value.trim(),
+        weight: parseInt(pWeight.inp.value,10) || 10,
+        qty: pQty.inp.value === '' ? null : parseInt(pQty.inp.value,10)
+      }});
+      setStatus(casesStatus, 'Приз добавлен');
+      loadCases();
+    }catch(e){ setStatus(casesStatus, e.message, true); }
+  };
+
+  [pName,pColor,pImage,pWeight,pQty].forEach(x=>pRow.appendChild(x.f));
+  pRow.appendChild(btnAddPrize);
+  wrap.appendChild(pRow);
+
+  // --- prize list ---
+  const list = document.createElement('div');
+  const prizes = c.prizes || [];
+  if (!prizes.length){
+    list.innerHTML = '<div class="empty-msg">Призов пока нет</div>';
+  } else {
+    const total = prizes.reduce((s,p)=>s+p.weight,0) || 1;
+    prizes.forEach(p=>{
+      const pr = document.createElement('div');
+      pr.className = 'prize-row';
+      pr.style.setProperty('--row-color', p.color);
+
+      const dot = document.createElement('div'); dot.className='dot';
+      const pn = document.createElement('div'); pn.className='pn'; pn.textContent = p.name;
+      const pw = document.createElement('div'); pw.className='pw'; pw.textContent = ((p.weight/total)*100).toFixed(1) + '%';
+      const pq = document.createElement('div'); pq.className='pq'; pq.textContent = (p.qty===null||p.qty===undefined) ? '∞' : ('×'+p.qty);
+
+      const btnEdit = document.createElement('button'); btnEdit.type='button'; btnEdit.textContent='✎';
+      btnEdit.title = 'Изменить';
+      btnEdit.onclick = async ()=>{
+        const newName = prompt('Название приза:', p.name); if (newName===null) return;
+        const newColor = prompt('Цвет (hex):', p.color) || p.color;
+        const newImage = prompt('Ссылка на картинку (пусто — без картинки):', p.image || '');
+        const newWeight = prompt('Шанс (вес):', p.weight);
+        const newQtyRaw = prompt('Количество (пусто — бесконечно):', (p.qty===null||p.qty===undefined)?'':p.qty);
+        try{
+          await api('/admin/prizes/' + p.id, { method:'PUT', body:{
+            name: newName.trim() || p.name, color: newColor, image: (newImage||'').trim(),
+            weight: parseInt(newWeight,10) || p.weight,
+            qty: (newQtyRaw===null||newQtyRaw.trim()==='') ? null : parseInt(newQtyRaw,10)
+          }});
+          setStatus(casesStatus, 'Приз обновлён');
+          loadCases();
+        }catch(e){ setStatus(casesStatus, e.message, true); }
+      };
+
+      const btnDel = document.createElement('button'); btnDel.type='button'; btnDel.className='rm'; btnDel.textContent='✕';
+      btnDel.title = 'Удалить';
+      btnDel.onclick = async ()=>{
+        if (!confirm('Удалить приз «' + p.name + '»?')) return;
+        try{
+          await api('/admin/prizes/' + p.id, { method:'DELETE' });
+          setStatus(casesStatus, 'Приз удалён');
+          loadCases();
+        }catch(e){ setStatus(casesStatus, e.message, true); }
+      };
+
+      pr.appendChild(dot); pr.appendChild(pn); pr.appendChild(pw); pr.appendChild(pq);
+      pr.appendChild(btnEdit); pr.appendChild(btnDel);
+      list.appendChild(pr);
+    });
+  }
+  wrap.appendChild(list);
+
+  return wrap;
+}
+
+document.getElementById('btnNewCase').addEventListener('click', async ()=>{
+  const name = prompt('Название нового кейса:', 'НОВЫЙ КЕЙС');
+  if (!name || !name.trim()) return;
+  const color = prompt('Цвет кейса (hex):', '#e4ae39') || '#e4ae39';
+  try{
+    const created = await api('/admin/cases', { method:'POST', body:{ name: name.trim(), color, image:'' } });
+    setStatus(casesStatus, 'Кейс создан');
+    openCaseId = created.id;
+    loadCases();
+  }catch(e){ setStatus(casesStatus, e.message, true); }
+});
+
+document.getElementById('btnImport').addEventListener('click', async ()=>{
+  const url = document.getElementById('importUrl').value.trim();
+  if (!url) return;
+  try{
+    const res = await api('/admin/cases/import', { method:'POST', body:{ url } });
+    setStatus(casesStatus, 'Импортировано кейсов: ' + res.imported);
+    loadCases();
+  }catch(e){ setStatus(casesStatus, e.message, true); }
+});
+
+/* ================= INIT ================= */
+
+(async function init(){
+  const ok = await tryRestoreSession();
+  if (ok) await enterApp();
+})();
+</script>
+</body>
+</html>
