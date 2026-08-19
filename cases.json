@@ -3,7 +3,7 @@
     {
       "name": "СТАРТОВЫЙ КЕЙС",
       "color": "#e4ae39",
-      "image": "https://raw.githubusercontent.com/SaportBati/huinya/refs/heads/main/case-starter.png",
+      "image": "https://github.com/SaportBati/CaseSamp/blob/main/admincase.png?raw=true",
       "prizes": [
         { "name": "AK-47 | Огонь", "color": "#4b69ff", "image": "https://raw.githubusercontent.com/SaportBati/huinya/refs/heads/main/azp.png", "weight": 50, "qty": null },
         { "name": "M4A4 | Графит", "color": "#8847ff", "image": null, "weight": 30, "qty": null },
@@ -14,7 +14,7 @@
     {
       "name": "ПРЕМИУМ КЕЙС",
       "color": "#c93b3b",
-      "image": "https://raw.githubusercontent.com/SaportBati/huinya/refs/heads/main/case-premium.png",
+      "image": "https://github.com/SaportBati/CaseSamp/blob/main/admincase.png?raw=true",
       "prizes": [
         { "name": "AWP | Азимов", "color": "#eb4b4b", "image": null, "weight": 40, "qty": null },
         { "name": "M4A1-S | Гидропоника", "color": "#4be07a", "image": null, "weight": 30, "qty": null },
@@ -26,7 +26,7 @@
     {
       "name": "ЛЕГЕНДАРНЫЙ КЕЙС",
       "color": "#8847ff",
-      "image": "https://raw.githubusercontent.com/SaportBati/huinya/refs/heads/main/case-legendary.png",
+      "image": "https://github.com/SaportBati/CaseSamp/blob/main/admincase.png?raw=true",
       "prizes": [
         { "name": "USP-S | Убийство наповал", "color": "#8b8f9c", "image": null, "weight": 45, "qty": null },
         { "name": "P250 | Азимов", "color": "#0072bc", "image": null, "weight": 25, "qty": null },
