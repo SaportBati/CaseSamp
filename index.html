@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Кейсы - Case Opener</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Loading screen -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loader">Загрузка кейсов...</div>
+  </div>
+
+  <!-- Header -->
+  <header class="main-header">
+    <div class="container">
+      <div class="header-content">
+        <h1 class="logo">Case Opener</h1>
+        <nav class="main-nav">
+          <a href="#" class="nav-link active">Кейсы</a>
+          <a href="#" class="nav-link">Лента</a>
+          <a href="#" class="nav-link">Профиль</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="container">
+      
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <div class="category-filter">
+          <button class="filter-btn active" data-category="all">Все кейсы</button>
+          <button class="filter-btn" data-category="serial">Серийные</button>
+          <button class="filter-btn" data-category="image">Имидж-кейсы</button>
+          <button class="filter-btn" data-category="brand">Фирменные</button>
+          <button class="filter-btn" data-category="knife">Ножевые</button>
+          <button class="filter-btn" data-category="limited">Ограниченная серия</button>
+          <button class="filter-btn" data-category="bonus">Бонусные</button>
+          <button class="filter-btn" data-category="operation">Операции</button>
+          <button class="filter-btn" data-category="valve">Valve CS2</button>
+        </div>
+        
+        <div class="search-box">
+          <input type="text" id="searchInput" placeholder="Поиск кейса...">
+          <button class="search-btn">🔍</button>
+        </div>
+      </div>
+
+      <!-- Case List -->
+      <div id="caseList" class="case-list">
+        <!-- Cases will be loaded here via JavaScript -->
+        <div class="empty-state">
+          <p>Загрузка кейсов...</p>
+        </div>
+      </div>
+
+      <!-- Modal for Case Selection -->
+      <div class="modal-overlay" id="caseModal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2>Выберите кейс</h2>
+            <button class="modal-close" id="modalClose">✕</button>
+          </div>
+          
+          <div class="modal-body">
+            <div class="modal-filter">
+              <input type="text" id="modalSearch" placeholder="Поиск...">
+            </div>
+            
+            <div class="modal-cases-grid" id="modalCasesGrid">
+              <!-- Cases will be loaded here -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="main-footer">
+    <div class="container">
+      <p>&copy; 2026 Case Opener. Все права защищены.</p>
+    </div>
+  </footer>
+
+  <script src="cases.js"></script>
+</body>
+</html>
