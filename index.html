@@ -910,12 +910,15 @@ window.CASE_IMAGES = [
 ];
 
 // ============================================
-//  JSON-ФАЙЛ С БАЗОВЫМИ КЕЙСАМИ
+//  ИСТОЧНИК БАЗОВЫХ КЕЙСОВ — ТЕПЕРЬ D1, А НЕ cases.json
 // ============================================
 // Список кейсов, который показывается при открытии сайта (галерея выбора
-// кейса). Файл должен лежать рядом с картинками в том же репозитории
-// (см. cases.json — там лежат 3 готовых кейса как пример).
-window.CASES_JSON_URL = window.IMAGES_BASE_URL + "cases.json";
+// кейса), теперь хранится в Cloudflare D1 (таблицы cases/prizes) и
+// отдаётся воркером через GET /api/cases. Управлять кейсами (создавать,
+// редактировать, удалять, добавлять призы) нужно через admin.html —
+// отдельную админ-панель, которая пишет прямо в D1.
+// Старый cases.json больше не используется как источник истины.
+window.CASES_API_URL = "https://curly-tooth-4ec5.aaf60251.workers.dev/api/cases";
 
 // Поддерживаем оба варианта: полная ссылка на картинку (https://...) или
 // просто имя файла из репозитория (тогда подставляем IMAGES_BASE_URL).
@@ -1099,25 +1102,27 @@ window.resolveImageUrl = function(src){
   loadCases();
   loadFeed();
 
-  // Подгружаем базовые кейсы из cases.json при КАЖДОЙ загрузке страницы.
-  // Кейсы из JSON помечаются полем presetKey ("json:0", "json:1", ...) —
-  // по нему находим уже существующую копию и обновляем её (название, цвет,
-  // картинку, призы), а если такой ещё нет — добавляем. Кейсы без этого
-  // поля (созданные вручную через "+ Создать кейс") никогда не трогаем.
-  (async function syncPresetCasesFromJSON(){
-    if (!window.CASES_JSON_URL) return;
+  // Подгружаем базовые кейсы из D1 (через воркер) при КАЖДОЙ загрузке
+  // страницы. Кейсы с сервера помечаются полем presetKey ("server:<id>") —
+  // по нему находим уже существующую локальную копию и обновляем её
+  // (название, цвет, картинку, призы), а если такой ещё нет — добавляем.
+  // Кейсы без этого поля (созданные вручную через "+ Создать кейс" прямо
+  // на сайте, если такая возможность используется) никогда не трогаем.
+  // Полноценное управление кейсами (создание/редактирование/удаление,
+  // призы) теперь делается в admin.html, который пишет прямо в D1.
+  (async function syncPresetCasesFromServer(){
+    if (!window.CASES_API_URL) return;
     try {
-      const res = await fetch(window.CASES_JSON_URL);
+      const res = await fetch(window.CASES_API_URL);
       if (!res.ok) return;
-      const data = await res.json();
-      const list = Array.isArray(data.cases) ? data.cases : (Array.isArray(data) ? data : []);
-      if (!list.length) return;
+      const list = await res.json();
+      if (!Array.isArray(list) || !list.length) return;
 
       const cases = window.CASES_DB || [];
       let changed = false;
 
-      list.forEach((c, i) => {
-        const presetKey = 'json:' + i;
+      list.forEach((c) => {
+        const presetKey = 'server:' + c.id;
         const prizes = (Array.isArray(c.prizes) ? c.prizes : []).map((p, j) => ({
           id: j + 1,
           name: p.name,
@@ -1137,7 +1142,7 @@ window.resolveImageUrl = function(src){
           cases.push({
             id: newId,
             presetKey: presetKey,
-            name: c.name || ('КЕЙС ' + (i + 1)),
+            name: c.name || 'КЕЙС',
             color: c.color || '#e4ae39',
             image: c.image || '',
             prizes: prizes
@@ -1146,9 +1151,8 @@ window.resolveImageUrl = function(src){
         changed = true;
       });
 
-      // оставляем только кейсы, реально пришедшие из cases.json —
-      // никаких иных (в т.ч. созданных вручную кнопкой "+ Создать кейс"
-      // или оставшихся от старых версий без presetKey) быть не должно
+      // оставляем только кейсы, реально пришедшие с сервера — никаких иных
+      // (в т.ч. оставшихся от старых версий без presetKey) быть не должно
       const onlyPresets = cases.filter(c => !!c.presetKey);
 
       if (changed || onlyPresets.length !== cases.length) {
@@ -1157,7 +1161,7 @@ window.resolveImageUrl = function(src){
         window.dispatchEvent(new Event('cases-db-ready'));
       }
     } catch(e) {
-      // сеть недоступна / файл не найден — остаёмся на том, что уже сохранено
+      // сеть недоступна / воркер не отвечает — остаёмся на том, что уже сохранено
     }
   })();
 
