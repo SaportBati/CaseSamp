@@ -5,10 +5,10 @@
       "color": "#e4ae39",
       "image": "https://github.com/SaportBati/CaseSamp/blob/main/admincase.png?raw=true",
       "prizes": [
-        { "name": "AK-47 | Огонь", "color": "#4b69ff", "image": "https://raw.githubusercontent.com/SaportBati/huinya/refs/heads/main/azp.png", "weight": 50, "qty": null },
-        { "name": "M4A4 | Графит", "color": "#8847ff", "image": null, "weight": 30, "qty": null },
-        { "name": "Desert Eagle | Синий лазурит", "color": "#0072bc", "image": null, "weight": 15, "qty": null },
-        { "name": "Ржавый нож", "color": "#b06638", "image": null, "weight": 5, "qty": null }
+        { "name": "Админ ЗП", "color": "#4b69ff", "image": "https://raw.githubusercontent.com/SaportBati/huinya/refs/heads/main/azp.png", "weight": 50, "qty": null },
+        { "name": "Банхаммер", "color": "#8847ff", "image": "https://cdn.azresources.cloud/projects/arizona-rp/assets/images/donate/6026.png", "weight": 30, "qty": null },
+        { "name": "Очки «ADMIN»", "color": "#0072bc", "image": "https://cdn.azresources.cloud/projects/arizona-rp/assets/images/donate/5929.png", "weight": 15, "qty": null },
+        { "name": "Админ-1", "color": "#b06638", "image": "https://cdn.azresources.cloud/projects/arizona-rp/assets/images/donate/6040.png", "weight": 5, "qty": null }
       ]
     },
     {
