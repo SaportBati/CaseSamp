@@ -619,9 +619,98 @@
   @media (max-width:560px){
     .settings-fab{top:12px;left:12px;width:38px;height:38px;font-size:16px;}
   }
+
+  /* ===== картинка кейса вместо стандартного ящика (если задана) ===== */
+  .crate-visual{width:100%;height:100%;display:flex;align-items:center;justify-content:center;}
+  .crate-visual img{
+    width:100%;height:100%;object-fit:contain;
+    filter:drop-shadow(0 0 24px color-mix(in srgb, var(--accent) 55%, transparent));
+  }
+
+  /* ===== список возможных призов под кнопкой "Открыть кейс" =====
+     в базовом состоянии видна только картинка/кружок приза, при наведении
+     всплывает подсказка с названием и шансом выпадения */
+  .showcase-panel{margin:0 0 40px;}
+  .showcase-title{
+    font-size:12px;text-transform:uppercase;letter-spacing:.14em;
+    color:var(--text-dim);text-align:center;margin:0 0 16px;font-weight:700;
+  }
+  .prize-showcase{
+    display:flex;flex-wrap:wrap;gap:14px;justify-content:center;
+  }
+  .showcase-item{
+    position:relative;width:72px;height:72px;flex:0 0 auto;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--panel-2);border:1px solid var(--line);
+    border-bottom:3px solid var(--item-color, var(--accent));
+    border-radius:8px;cursor:default;
+    transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .showcase-item:hover{
+    transform:translateY(-3px);
+    box-shadow:0 6px 20px color-mix(in srgb, var(--item-color, var(--accent)) 30%, transparent);
+    z-index:2;
+  }
+  .showcase-item .dot{width:32px;height:32px;margin-bottom:0;}
+  .showcase-item .thumb{width:50px;height:50px;margin-bottom:0;}
+  .showcase-tooltip{
+    position:absolute;left:50%;bottom:calc(100% + 10px);
+    transform:translate(-50%,4px);
+    background:var(--panel);border:1px solid var(--line);
+    border-radius:6px;padding:8px 14px;white-space:nowrap;text-align:center;
+    opacity:0;pointer-events:none;
+    transition:opacity .15s ease, transform .15s ease;
+    box-shadow:0 10px 30px rgba(0,0,0,.45);
+  }
+  .showcase-tooltip::after{
+    content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);
+    border-left:6px solid transparent;border-right:6px solid transparent;
+    border-top:6px solid var(--line);
+  }
+  .showcase-item:hover .showcase-tooltip{opacity:1;transform:translate(-50%,0);}
+  .showcase-tooltip .st-name{font-size:12.5px;font-weight:700;margin-bottom:3px;}
+  .showcase-tooltip .st-chance{font-size:12px;color:var(--accent);font-weight:800;}
+
+  /* ===== галерея выбора кейса — стартовый экран после входа ===== */
+  .gallery-screen{display:none;max-width:1100px;margin:0 auto;padding:40px 16px 60px;}
+  body.browsing-gallery:not(.not-authed) .gallery-screen{display:block;}
+  body.browsing-gallery .page{display:none !important;}
+  .gallery-wrap{max-width:1100px;margin:0 auto;}
+  .gallery-title{
+    font-size:clamp(26px,4vw,38px);font-weight:900;text-transform:uppercase;
+    letter-spacing:.03em;text-align:center;margin:0 0 32px;
+  }
+  .gallery-grid{
+    display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));
+    gap:20px;
+  }
+  .gallery-card{
+    background:linear-gradient(180deg, var(--panel), var(--panel-2));
+    border:1px solid var(--line);border-radius:8px;overflow:hidden;
+    cursor:pointer;text-align:center;
+    transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  }
+  .gallery-card:hover{
+    transform:translateY(-4px);
+    border-color:var(--item-color, var(--accent));
+    box-shadow:0 14px 40px color-mix(in srgb, var(--item-color, var(--accent)) 30%, transparent);
+  }
+  .gallery-card-image{
+    height:150px;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(ellipse at 50% 30%, color-mix(in srgb, var(--item-color, var(--accent)) 22%, transparent), transparent 70%);
+    border-bottom:1px solid var(--line);
+  }
+  .gallery-card-image img{max-width:70%;max-height:70%;object-fit:contain;
+    filter:drop-shadow(0 0 18px color-mix(in srgb, var(--item-color, var(--accent)) 55%, transparent));}
+  .gallery-card-fallback{font-size:44px;opacity:.85;}
+  .gallery-card-name{
+    font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;
+    padding:16px 14px 4px;
+  }
+  .gallery-card-count{font-size:12px;color:var(--text-dim);padding:0 14px 16px;}
 </style>
 </head>
-<body class="not-authed">
+<body class="not-authed browsing-gallery">
 
 <!-- ===== экран входа: показывается, пока не введён верный логин/пароль ===== -->
 <div class="auth-overlay" id="authOverlay">
@@ -649,6 +738,18 @@
 
 <button type="button" class="settings-fab" id="btnSettings" title="Настройки кейса">⚙️</button>
 <button type="button" class="logout-fab" id="btnLogout" title="Выйти">🚪</button>
+
+<!-- ===== галерея выбора кейса: показывается сразу после входа ===== -->
+<div class="gallery-screen" id="galleryScreen">
+  <div class="gallery-wrap">
+    <div class="eyebrow">Выберите кейс</div>
+    <div class="gallery-title">Кейсы</div>
+    <div class="gallery-grid" id="galleryGrid">
+      <p style="color:var(--text-dim);text-align:center;grid-column:1/-1;">Загрузка кейсов...</p>
+    </div>
+  </div>
+</div>
+
 <div class="page">
 <div class="wrap">
 
@@ -658,7 +759,7 @@
       <span class="case-dot" id="caseDot"></span>
       <span class="case-name" id="caseNameDisplay">МОЙ КЕЙС</span>
     </div>
-    <button type="button" class="case-select-btn" id="btnSelectCase">Выбрать</button>
+    <button type="button" class="case-select-btn" id="btnSelectCase">Все кейсы</button>
   </div>
   <div class="name-edit">
     <input id="caseName" type="text" maxlength="40" value="МОЙ КЕЙС">
@@ -674,17 +775,19 @@
     <div class="stage-crate" id="stageCrate">
       <div class="crate" id="crate">
         <div class="flash" id="flash"></div>
-        <svg viewBox="0 0 200 200">
-          <g id="crateBody">
-            <rect x="20" y="70" width="160" height="100" rx="4" fill="#22252d" stroke="var(--accent)" stroke-width="3"/>
-            <rect x="20" y="70" width="160" height="26" fill="var(--accent-dim)"/>
-            <rect x="88" y="70" width="24" height="100" fill="#171920"/>
-            <rect x="30" y="120" width="140" height="6" fill="#171920"/>
-            <rect x="10" y="55" width="180" height="22" rx="3" fill="var(--accent)"/>
-            <polygon points="90,30 110,30 130,58 70,58" fill="var(--accent)"/>
-            <circle cx="100" cy="45" r="6" fill="#171920"/>
-          </g>
-        </svg>
+        <div class="crate-visual" id="crateVisual">
+          <svg viewBox="0 0 200 200">
+            <g id="crateBody">
+              <rect x="20" y="70" width="160" height="100" rx="4" fill="#22252d" stroke="var(--accent)" stroke-width="3"/>
+              <rect x="20" y="70" width="160" height="26" fill="var(--accent-dim)"/>
+              <rect x="88" y="70" width="24" height="100" fill="#171920"/>
+              <rect x="30" y="120" width="140" height="6" fill="#171920"/>
+              <rect x="10" y="55" width="180" height="22" rx="3" fill="var(--accent)"/>
+              <polygon points="90,30 110,30 130,58 70,58" fill="var(--accent)"/>
+              <circle cx="100" cy="45" r="6" fill="#171920"/>
+            </g>
+          </svg>
+        </div>
       </div>
     </div>
 
@@ -710,6 +813,11 @@
   <button type="button" class="open-btn" id="openBtn" disabled>Открыть кейс</button>
   <div class="hint" id="hint">Добавьте минимум 2 предмета в кейс, чтобы его открыть</div>
 
+  <div class="showcase-panel">
+    <h2 class="showcase-title">Возможные призы</h2>
+    <div class="prize-showcase" id="prizeShowcase"></div>
+  </div>
+
 </div>
 
 <div class="settings-overlay" id="settingsOverlay">
@@ -727,6 +835,12 @@
           <input type="color" id="themeColor" value="#e4ae39">
           <label>Основной цвет кейса</label>
         </div>
+      </div>
+      <div class="theme-row" style="margin-top:14px;">
+        <select id="caseImageSelect">
+          <option value="">Без картинки (стандартный ящик)</option>
+        </select>
+        <label>Картинка кейса (сундук, показывается до открытия)</label>
       </div>
     </div>
 
@@ -806,6 +920,14 @@ window.IMAGES_BASE_URL = "https://raw.githubusercontent.com/SaportBati/huinya/re
 window.CASE_IMAGES = [
   "azp.png",
 ];
+
+// ============================================
+//  JSON-ФАЙЛ С БАЗОВЫМИ КЕЙСАМИ
+// ============================================
+// Список кейсов, который показывается при открытии сайта (галерея выбора
+// кейса). Файл должен лежать рядом с картинками в том же репозитории
+// (см. cases.json — там лежат 3 готовых кейса как пример).
+window.CASES_JSON_URL = window.IMAGES_BASE_URL + "cases.json";
 </script>
 
 <script>
@@ -958,16 +1080,52 @@ window.CASE_IMAGES = [
   loadCases();
   loadFeed();
 
+  // Подгружаем базовые кейсы из cases.json. Делаем это только если у
+  // пользователя ещё нет сохранённых кейсов в localStorage (первый визит) —
+  // так мы не затираем уже созданные/отредактированные кейсы.
+  (async function seedCasesFromJSON(){
+    let alreadySaved = false;
+    try { alreadySaved = !!localStorage.getItem(CASES_DB_KEY); } catch(e){}
+    if (alreadySaved) return;
+    if (!window.CASES_JSON_URL) return;
+    try {
+      const res = await fetch(window.CASES_JSON_URL);
+      if (!res.ok) return;
+      const data = await res.json();
+      const list = Array.isArray(data.cases) ? data.cases : (Array.isArray(data) ? data : []);
+      if (!list.length) return;
+      const seeded = list.map((c, i) => ({
+        id: i + 1,
+        name: c.name || ('КЕЙС ' + (i + 1)),
+        color: c.color || '#e4ae39',
+        image: c.image || '',
+        prizes: (Array.isArray(c.prizes) ? c.prizes : []).map((p, j) => ({
+          id: j + 1,
+          name: p.name,
+          color: p.color || '#4b69ff',
+          image: p.image || null,
+          weight: p.weight || 10,
+          qty: (p.qty === undefined) ? null : p.qty
+        }))
+      }));
+      window.CASES_DB = seeded;
+      saveCases();
+      window.dispatchEvent(new Event('cases-db-ready'));
+    } catch(e) {
+      // сеть недоступна / файл не найден — остаёмся на встроенном дефолтном кейсе
+    }
+  })();
+
   window.CaseDB = {
     getCases: function(){ return window.CASES_DB || []; },
     getCaseById: function(id){
       const cases = window.CASES_DB || [];
       return cases.find(c => c.id === id) || null;
     },
-    addCase: function(name, color, prizes){
+    addCase: function(name, color, prizes, image){
       const cases = window.CASES_DB || [];
       const newId = Math.max(0, ...cases.map(c => c.id)) + 1;
-      const newCase = { id: newId, name: name, color: color || '#e4ae39', prizes: prizes || [] };
+      const newCase = { id: newId, name: name, color: color || '#e4ae39', image: image || '', prizes: prizes || [] };
       cases.push(newCase);
       window.CASES_DB = cases;
       saveCases();
@@ -1114,6 +1272,7 @@ window.CASE_IMAGES = [
   btnLogout.addEventListener('click', function(){
     window.API.logout();
     body.classList.add('not-authed');
+    body.classList.add('browsing-gallery');
     authLogin.value = '';
     authPassword.value = '';
     authError.textContent = '';
@@ -1132,6 +1291,77 @@ window.CASE_IMAGES = [
   const caseSelectorList = document.getElementById('caseSelectorList');
   const caseDot = document.getElementById('caseDot');
   const caseNameDisplay = document.getElementById('caseNameDisplay');
+  const caseImageSelect = document.getElementById('caseImageSelect');
+
+  // ===== галерея выбора кейса (стартовый экран) =====
+  const galleryGrid = document.getElementById('galleryGrid');
+
+  function galleryVisualEl(c){
+    if (c.image){
+      const img = document.createElement('img');
+      img.src = window.IMAGES_BASE_URL + c.image;
+      img.alt = c.name;
+      img.onerror = function(){
+        const fb = document.createElement('div');
+        fb.className = 'gallery-card-fallback';
+        fb.textContent = '📦';
+        img.replaceWith(fb);
+      };
+      return img;
+    }
+    const fb = document.createElement('div');
+    fb.className = 'gallery-card-fallback';
+    fb.textContent = '📦';
+    return fb;
+  }
+
+  function renderGallery(){
+    if (!galleryGrid) return;
+    const cases = window.CaseDB.getCases();
+    galleryGrid.innerHTML = '';
+    if (cases.length === 0){
+      galleryGrid.innerHTML = '<p style="color:var(--text-dim);text-align:center;grid-column:1/-1;">Кейсы не найдены</p>';
+      return;
+    }
+    cases.forEach(c=>{
+      const card = document.createElement('div');
+      card.className = 'gallery-card';
+      card.style.setProperty('--item-color', c.color || '#e4ae39');
+
+      const imgWrap = document.createElement('div');
+      imgWrap.className = 'gallery-card-image';
+      imgWrap.appendChild(galleryVisualEl(c));
+
+      const name = document.createElement('div');
+      name.className = 'gallery-card-name';
+      name.textContent = c.name;
+
+      const count = document.createElement('div');
+      count.className = 'gallery-card-count';
+      count.textContent = (c.prizes?.length || 0) + ' призов';
+
+      card.appendChild(imgWrap);
+      card.appendChild(name);
+      card.appendChild(count);
+      card.addEventListener('click', ()=> chooseCaseFromGallery(c.id));
+      galleryGrid.appendChild(card);
+    });
+  }
+
+  function chooseCaseFromGallery(id){
+    currentCaseId = id;
+    loadCurrentCase();
+    document.body.classList.remove('browsing-gallery');
+  }
+
+  function showGallery(){
+    document.body.classList.add('browsing-gallery');
+    renderGallery();
+  }
+
+  window.addEventListener('cases-db-ready', function(){
+    renderGallery();
+  });
 
   // Рендер списка кейсов в модалке (сетка 3 в ряд)
   function renderCaseSelectorList(){
@@ -1190,6 +1420,7 @@ window.CASE_IMAGES = [
     currentCaseId = caseId;
     loadCurrentCase();
     renderCaseSelectorList();
+    document.body.classList.remove('browsing-gallery');
     closeSettings();
   }
 
@@ -1224,7 +1455,7 @@ window.CASE_IMAGES = [
   }
 
   // Открытие выбора кейса
-  btnSelectCase.addEventListener('click', openSettings);
+  btnSelectCase.addEventListener('click', showGallery);
   btnCreateCase.addEventListener('click', createCase);
 
   // ===== модалка настроек (шестерёнка) =====
@@ -1264,6 +1495,9 @@ window.CASE_IMAGES = [
   const stageCrate = document.getElementById('stageCrate');
   const stageReel = document.getElementById('stageReel');
   const crate = document.getElementById('crate');
+  const crateVisual = document.getElementById('crateVisual');
+  const defaultCrateMarkup = crateVisual ? crateVisual.innerHTML : '';
+  const prizeShowcase = document.getElementById('prizeShowcase');
   const flash = document.getElementById('flash');
   const openBtn = document.getElementById('openBtn');
   const hint = document.getElementById('hint');
@@ -1318,7 +1552,9 @@ window.CASE_IMAGES = [
     prizes = currentCase.prizes || [];
     updateCaseNameDisplay();
     updateThemeFromCase();
+    applyCaseHeroImage();
     renderPrizeList();
+    renderPrizeShowcase();
     // Обновить UI списка кейсов если модалка открыта
     if (settingsOverlay.classList.contains('show')){
       renderCaseSelectorList();
@@ -1326,6 +1562,54 @@ window.CASE_IMAGES = [
     // Обновить отображение текущего кейса
     caseNameDisplay.textContent = currentCase.name;
     caseDot.style.backgroundColor = currentCase.color;
+    if (caseImageSelect) caseImageSelect.value = currentCase.image || '';
+  }
+
+  // Картинка кейса (сундука) вместо стандартного ящика — показывается в
+  // состоянии покоя, ровно там же где раньше была статичная SVG-иконка.
+  // Анимация тряски/вспышки и переход в барабан не трогаем.
+  function applyCaseHeroImage(){
+    if (!crateVisual) return;
+    if (currentCase && currentCase.image){
+      crateVisual.innerHTML = '';
+      const img = document.createElement('img');
+      img.src = window.IMAGES_BASE_URL + currentCase.image;
+      img.alt = currentCase.name;
+      img.onerror = function(){ crateVisual.innerHTML = defaultCrateMarkup; };
+      crateVisual.appendChild(img);
+    } else {
+      crateVisual.innerHTML = defaultCrateMarkup;
+    }
+  }
+
+  // Список возможных призов под кнопкой "Открыть кейс": видна только
+  // картинка/кружок приза, при наведении всплывает название и шанс выпадения.
+  function renderPrizeShowcase(){
+    if (!prizeShowcase) return;
+    prizeShowcase.innerHTML = '';
+    if (!prizes.length) return;
+    const totalWeight = prizes.reduce((s,p)=>s+p.weight,0) || 1;
+    prizes.forEach(p=>{
+      const item = document.createElement('div');
+      item.className = 'showcase-item';
+      item.style.setProperty('--item-color', p.color);
+
+      const visual = visualEl(p, 'strip');
+      const tooltip = document.createElement('div');
+      tooltip.className = 'showcase-tooltip';
+      const stName = document.createElement('div');
+      stName.className = 'st-name';
+      stName.textContent = p.name;
+      const stChance = document.createElement('div');
+      stChance.className = 'st-chance';
+      stChance.textContent = ((p.weight/totalWeight)*100).toFixed(1) + '%';
+      tooltip.appendChild(stName);
+      tooltip.appendChild(stChance);
+
+      item.appendChild(visual);
+      item.appendChild(tooltip);
+      prizeShowcase.appendChild(item);
+    });
   }
 
   // Обновление названия кейса в UI
@@ -1362,6 +1646,20 @@ window.CASE_IMAGES = [
     opt.textContent = name;
     pImage.appendChild(opt);
   });
+  if (caseImageSelect){
+    available.forEach(name=>{
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = name;
+      caseImageSelect.appendChild(opt);
+    });
+    caseImageSelect.addEventListener('change', function(){
+      if (!currentCase) return;
+      window.CaseDB.updateCase(currentCase.id, { image: this.value });
+      loadCurrentCase();
+      renderGallery();
+    });
+  }
 
   function updateOpenState(){
     const ok = prizes.length >= 2;
@@ -1400,6 +1698,7 @@ window.CASE_IMAGES = [
       e.textContent = 'Пока пусто — добавьте первый приз выше';
       prizeListEl.appendChild(e);
       updateOpenState();
+      renderPrizeShowcase();
       return;
     }
     const totalWeight = prizes.reduce((s,p)=>s+p.weight,0);
@@ -1449,6 +1748,7 @@ window.CASE_IMAGES = [
       prizeListEl.appendChild(row);
     });
     updateOpenState();
+    renderPrizeShowcase();
   }
 
   function resetForm(){
@@ -1888,6 +2188,7 @@ window.CASE_IMAGES = [
   // ===== ИНИЦИАЛИЗАЦИЯ КЕЙСОВ ПРИ ЗАГРУЗКЕ =====
   loadCurrentCase();
   renderPrizeList();
+  renderGallery();
 })();
 </script>
 </body>
