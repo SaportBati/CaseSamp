@@ -522,20 +522,9 @@
     background:var(--panel-2);border:1px solid var(--line);
     border-radius:4px;overflow:hidden;
     transition:transform .15s ease, box-shadow .15s ease;
-    display:flex;flex-direction:column;
   }
   .case-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3);}
   .case-card.active{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent);}
-  .case-img-wrap{
-    width:100%;height:140px;
-    display:flex;align-items:center;justify-content:center;
-    background:radial-gradient(circle at 50% 30%, color-mix(in srgb, var(--item-color) 15%, transparent), transparent 70%);
-    padding:12px;
-  }
-  .case-img-wrap img{
-    max-width:100%;max-height:100%;object-fit:contain;
-    border-radius:4px;
-  }
   .case-header{
     height:4px;
     background:var(--item-color, #4b69ff);
@@ -1050,32 +1039,21 @@ window.resolveImageUrl = function(src){
   const CASES_DB_KEY = 'case_opener_cases_db';
   const FEED_DB_KEY = 'case_opener_feed_db';
 
-  const DEFAULT_CASES = [
-    {
-      id: 1,
-      name: "МОЙ КЕЙС",
-      color: "#e4ae39",
-      prizes: [
-        { id: 1, name: "AK-47 | Огонь", color: "#4b69ff", image: "azp.png", weight: 50, qty: null },
-        { id: 2, name: "M4A4 | Графит", color: "#8847ff", image: null, weight: 30, qty: null },
-        { id: 3, name: "Desert Eagle | Синий лазурит", color: "#0072bc", image: null, weight: 15, qty: null },
-        { id: 4, name: "Ржавый нож", color: "#b06638", image: null, weight: 5, qty: null }
-      ]
-    }
-  ];
-
+  // Никаких захардкоженных кейсов "по умолчанию" — единственный источник
+  // истины для списка кейсов это cases.json (см. syncPresetCasesFromJSON
+  // ниже). Пока он не загрузился, список просто пуст.
   function loadCases(){
     try {
       const saved = localStorage.getItem(CASES_DB_KEY);
       if (saved){
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0){
+        if (Array.isArray(parsed)){
           window.CASES_DB = parsed;
           return;
         }
       }
     } catch(e){}
-    window.CASES_DB = JSON.parse(JSON.stringify(DEFAULT_CASES));
+    window.CASES_DB = [];
   }
 
   function saveCases(){
@@ -1144,8 +1122,13 @@ window.resolveImageUrl = function(src){
         changed = true;
       });
 
-      if (changed) {
-        window.CASES_DB = cases;
+      // оставляем только кейсы, реально пришедшие из cases.json —
+      // никаких иных (в т.ч. созданных вручную кнопкой "+ Создать кейс"
+      // или оставшихся от старых версий без presetKey) быть не должно
+      const onlyPresets = cases.filter(c => !!c.presetKey);
+
+      if (changed || onlyPresets.length !== cases.length) {
+        window.CASES_DB = onlyPresets;
         saveCases();
         window.dispatchEvent(new Event('cases-db-ready'));
       }
@@ -1395,6 +1378,9 @@ window.resolveImageUrl = function(src){
 
   window.addEventListener('cases-db-ready', function(){
     renderGallery();
+    if (!currentCase){
+      loadCurrentCase();
+    }
   });
 
   // Рендер списка кейсов в модалке (сетка 3 в ряд)
@@ -1411,18 +1397,6 @@ window.resolveImageUrl = function(src){
       const card = document.createElement('div');
       card.className = 'case-card' + (c.id === currentCaseId ? ' active' : '');
       card.style.setProperty('--item-color', c.color);
-
-      // Изображение кейса
-      const imgWrap = document.createElement('div');
-      imgWrap.className = 'case-img-wrap';
-      if (c.image){
-        const img = document.createElement('img');
-        img.src = window.resolveImageUrl(c.image);
-        img.alt = c.name;
-        img.onerror = function(){ this.style.display='none'; };
-        imgWrap.appendChild(img);
-      }
-      card.appendChild(imgWrap);
 
       const header = document.createElement('div');
       header.className = 'case-header';
@@ -1585,15 +1559,17 @@ window.resolveImageUrl = function(src){
   function loadCurrentCase(){
     const cases = window.CaseDB.getCases();
     if (cases.length === 0){
-      // Создать пустой кейс если нет ни одного
-      currentCase = window.CaseDB.addCase("МОЙ КЕЙС", "#e4ae39");
+      // Кейсы из cases.json ещё не подгрузились — ничего не создаём,
+      // просто ждём событие cases-db-ready, оно вызовет loadCurrentCase снова
+      currentCase = null;
+      prizes = [];
+      caseNameDisplay.textContent = 'Загрузка...';
+      return;
+    }
+    currentCase = window.CaseDB.getCaseById(currentCaseId);
+    if (!currentCase){
+      currentCase = cases[0];
       currentCaseId = currentCase.id;
-    } else {
-      currentCase = window.CaseDB.getCaseById(currentCaseId);
-      if (!currentCase){
-        currentCase = cases[0];
-        currentCaseId = currentCase.id;
-      }
     }
     prizes = currentCase.prizes || [];
     updateCaseNameDisplay();
