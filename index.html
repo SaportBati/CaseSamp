@@ -362,7 +362,7 @@
   /* на широких экранах резервируем место под фиксированную ленту справа —
      резерв общий для body, поэтому действует и на .page, и на .gallery-screen */
   @media (min-width:1300px){
-    body{padding-right:368px;}
+    body{padding-right:400px;}
   }
 
   /* ===== кнопка настроек (шестерёнка), фиксирована в левом верхнем углу ===== */
@@ -484,14 +484,15 @@
      (aside вынесен из .page на уровень body — см. разметку). Пополняется
      живыми открытиями всех игроков, приходящими с сервера. ===== */
   .side-feed{
-    position:fixed;top:96px;right:24px;z-index:45;
-    width:336px;
-    max-height:calc(100vh - 130px);
+    position:fixed;top:0;right:0;bottom:0;z-index:45;
+    width:400px;height:100vh;
     display:flex;flex-direction:column;
-    background:transparent;border:none;border-radius:0;
-    padding:0;box-shadow:none;
+    background:var(--panel);
+    border-left:1px solid var(--line);
+    border-radius:0;
+    padding:24px 20px;box-shadow:-20px 0 50px rgba(0,0,0,.35);
   }
-  .feed-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;flex:0 0 auto;}
+  .feed-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:16px;flex:0 0 auto;}
   .feed-title{display:flex;align-items:center;gap:8px;}
   .feed-title h2{margin:0;font-size:13px;text-transform:uppercase;letter-spacing:.14em;color:var(--text-dim);font-weight:700;}
   .live-dot{
@@ -561,10 +562,20 @@
   .feed-track-wrap{
     position:relative;flex:1 1 auto;min-height:0;
     border:1px solid var(--line);border-radius:8px;
-    overflow-y:auto;overflow-x:visible;
+    overflow:hidden;
     background:var(--panel);
   }
   .feed-track{display:flex;flex-direction:column;}
+  /* когда карточки не влезают в видимую область, лента дублируется и
+     плавно, бесконечно "перетекает" вниз — см. renderFeedTrack() в скрипте */
+  .feed-track.marquee{
+    animation: feedMarquee var(--marquee-duration, 30s) linear infinite;
+  }
+  .feed-track-wrap:hover .feed-track.marquee{animation-play-state:paused;}
+  @keyframes feedMarquee{
+    from{ transform: translateY(-50%); }
+    to{ transform: translateY(0%); }
+  }
 
   .feed-item{
     position:relative;
@@ -623,7 +634,7 @@
       position:static;width:100%;max-height:none;
       margin-top:28px;top:auto;right:auto;
     }
-    .feed-track-wrap{max-height:460px;overflow-y:auto;}
+    .feed-track-wrap{max-height:460px;overflow:hidden;}
     .feed-tooltip{
       top:calc(100% + 8px);right:auto;left:50%;
       transform:translate(-50%,-4px);
@@ -1958,6 +1969,7 @@ window.resolveImageUrl = function(src){
   // игроков (GET /api/feed?since=<последний_известный_id>) и дорисовывает их.
   const FEED_MAX_SHOWN = 80;
   const FEED_POLL_MS = 4000;
+  const FEED_SCROLL_PX_PER_SEC = 36; // скорость бесконечной прокрутки ленты вниз
 
   let feedEntries = [];       // отображаемые записи, от старых к новым
   let feedKnownIds = new Set(); // id записей с сервера, уже показанных (без дублей)
@@ -2036,6 +2048,10 @@ window.resolveImageUrl = function(src){
   // Список приходит с сервера (см. initFeed/pollFeed ниже), здесь только
   // отрисовка того, что уже лежит в feedEntries.
   function renderFeedTrack(){
+    // сбрасываем анимацию перед перерисовкой, чтобы корректно пересчитать
+    // её заново под новый набор карточек
+    feedTrack.classList.remove('marquee');
+    feedTrack.style.removeProperty('--marquee-duration');
     feedTrack.innerHTML = '';
 
     if(feedEntries.length === 0){
@@ -2049,6 +2065,22 @@ window.resolveImageUrl = function(src){
     // feedEntries хранится от старых к новым — на экране новые сверху
     const list = feedEntries.slice(-FEED_MAX_SHOWN).slice().reverse();
     list.forEach(e => feedTrack.appendChild(feedItemNode(e)));
+
+    // если карточки не влезают в видимую область панели — дублируем список
+    // (вторая копия сразу следом за первой) и запускаем бесконечную плавную
+    // прокрутку вниз: translateY идёт от -50% к 0%, а в момент, когда
+    // видна ровно вторая копия, лента незаметно "перескакивает" обратно —
+    // визуально это выглядит как непрерывная лента без рывков и без конца
+    requestAnimationFrame(()=>{
+      const contentHeight = feedTrack.scrollHeight;
+      const viewportHeight = feedTrackWrap.clientHeight;
+      if(contentHeight > viewportHeight){
+        list.forEach(e => feedTrack.appendChild(feedItemNode(e)));
+        const duration = Math.max(10, contentHeight / FEED_SCROLL_PX_PER_SEC);
+        feedTrack.style.setProperty('--marquee-duration', duration.toFixed(1) + 's');
+        feedTrack.classList.add('marquee');
+      }
+    });
   }
 
   // Добавляет запись в отображаемый список, отбрасывая дубли по id записи
