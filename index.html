@@ -25,7 +25,7 @@
     color:var(--text);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
     min-height:100vh;
-    padding:32px 16px 80px;
+    padding:0 16px 80px;
   }
   .wrap{max-width:920px;margin:0 auto;}
 
@@ -290,7 +290,7 @@
   .empty-msg{color:var(--text-dim);font-size:13px;text-align:center;padding:24px 0;}
 
   /* ===== layout: основная колонка; лента открытий — постоянная панель справа (см. .side-feed) ===== */
-  .page{max-width:920px;margin:0 auto;}
+  .page{max-width:920px;margin:0 auto;padding-top:calc(var(--header-h) + 28px);}
 
   /* на широких экранах резервируем место под фиксированную ленту справа —
      резерв общий для body, поэтому действует и на .page, и на .gallery-screen */
@@ -298,24 +298,55 @@
     body{padding-right:400px;}
   }
 
-  /* ===== кнопка перехода в админ-панель, видна только администраторам,
-     фиксирована в левом верхнем углу (там, где раньше была шестерёнка
-     настроек кейса) ===== */
-  .admin-fab{
-    position:fixed;top:20px;left:20px;z-index:60;
-    width:44px;height:44px;border-radius:50%;
-    background:var(--panel-2);border:1px solid var(--line);color:var(--text);
-    font-size:19px;cursor:pointer;text-decoration:none;
-    display:none;align-items:center;justify-content:center;
-    box-shadow:0 6px 20px rgba(0,0,0,.4);
-    transition:border-color .2s ease, color .2s ease, transform .2s ease;
+  /* ===== верхняя панель сайта: логотип слева, действия аккаунта справа.
+     Занимает всю ширину (в т.ч. поверх ленты открытий), поэтому кнопки
+     админки/выхода больше не висят одинокими кружками в углу, а сидят в
+     общей полосе интерфейса — как в admin.html ===== */
+  :root{ --header-h:64px; }
+  .site-header{
+    position:fixed;top:0;left:0;right:0;z-index:70;
+    height:var(--header-h);
+    display:flex;align-items:center;justify-content:space-between;
+    gap:16px;padding:0 24px;
+    background:color-mix(in srgb, var(--panel) 88%, transparent);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
   }
-  .admin-fab.show{display:flex;}
-  .admin-fab:hover{border-color:var(--accent);color:var(--accent);transform:rotate(15deg);}
+  .site-header .brand{
+    display:flex;align-items:center;gap:10px;
+    font-size:13px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--text);white-space:nowrap;
+  }
+  .site-header .brand .brand-mark{
+    width:9px;height:9px;border-radius:50%;background:var(--accent);
+    box-shadow:0 0 10px color-mix(in srgb, var(--accent) 70%, transparent);
+    flex:0 0 auto;
+  }
+  .site-header .brand span.brand-dim{color:var(--text-dim);font-weight:600;}
+  .header-actions{display:flex;align-items:center;gap:10px;}
+  .header-btn{
+    display:none;align-items:center;gap:7px;
+    background:var(--panel-2);border:1px solid var(--line);color:var(--text);
+    padding:9px 16px;border-radius:5px;font-size:12px;font-weight:700;
+    text-transform:uppercase;letter-spacing:.05em;cursor:pointer;
+    text-decoration:none;white-space:nowrap;
+    transition:border-color .2s ease,color .2s ease;
+  }
+  .header-btn.always{display:flex;}
+  .header-btn.show{display:flex;}
+  .header-btn .hb-icon{font-size:14px;line-height:1;}
+  #btnAdmin.header-btn:hover{border-color:var(--accent);color:var(--accent);}
+  #btnLogout.header-btn:hover{border-color:var(--danger);color:var(--danger);}
+  @media (max-width:640px){
+    .site-header{padding:0 14px;}
+    .site-header .brand .brand-text{display:none;}
+    .header-btn{padding:9px 11px;}
+    .header-btn .hb-label{display:none;}
+  }
 
   /* ===== пока не залогинен — прячем весь сайт, кроме экрана входа ===== */
   body.not-authed .page,
-  body.not-authed .admin-fab,
+  body.not-authed .site-header,
   body.not-authed .side-feed{
     display:none !important;
   }
@@ -365,34 +396,22 @@
   }
   .auth-remember input{width:14px;height:14px;}
 
-  /* ===== кнопка выхода, рядом с шестерёнкой настроек ===== */
-  .logout-fab{
-    position:fixed;top:20px;left:74px;z-index:60;
-    width:44px;height:44px;border-radius:50%;
-    background:var(--panel-2);border:1px solid var(--line);color:var(--text);
-    font-size:18px;cursor:pointer;
-    display:flex;align-items:center;justify-content:center;
-    box-shadow:0 6px 20px rgba(0,0,0,.4);
-    transition:border-color .2s ease, color .2s ease;
-  }
-  .logout-fab:hover{border-color:var(--danger);color:var(--danger);}
-  @media (max-width:600px){
-    .logout-fab{top:12px;left:60px;width:38px;height:38px;font-size:15px;}
-  }
-
   /* ===== лента открытий — постоянная панель, закреплена у правого края
      экрана. Видна и в галерее выбора кейса, и внутри конкретного кейса
      (aside вынесен из .page на уровень body — см. разметку). Пополняется
      живыми открытиями всех игроков, приходящими с сервера. ===== */
   .side-feed{
-    position:fixed;top:0;right:0;bottom:0;z-index:45;
-    width:400px;height:100vh;
+    position:fixed;top:var(--header-h);right:0;bottom:0;z-index:45;
+    width:400px;height:calc(100vh - var(--header-h));
     display:flex;flex-direction:column;
     background:transparent;
     border:none;
     padding:0;
   }
-  .feed-title{display:flex;align-items:center;gap:8px;}
+  .feed-title{
+    display:flex;align-items:center;gap:9px;flex:0 0 auto;
+    padding:18px 20px 14px;background:var(--panel);border-bottom:1px solid var(--line);
+  }
   .feed-title h2{margin:0;font-size:13px;text-transform:uppercase;letter-spacing:.14em;color:var(--text-dim);font-weight:700;}
   .live-dot{
     width:8px;height:8px;border-radius:50%;background:#4be07a;flex:0 0 auto;
@@ -408,7 +427,6 @@
   }
   .feed-icon-btn:hover{border-color:var(--accent);color:var(--accent);}
   .feed-status{font-size:10.5px;color:var(--accent);letter-spacing:.02em;margin:0 0 10px;min-height:13px;text-align:center;}
-  .feed-status:empty{margin:0;}
   .feed-status:empty{margin:0;}
 
   /* лента живая: карточки одна под другой внутри прокручиваемой панели,
@@ -473,7 +491,7 @@
     .feed-track-wrap{max-height:460px;overflow:hidden;}
   }
   @media (max-width:560px){
-    .admin-fab{top:12px;left:12px;width:38px;height:38px;font-size:16px;}
+    :root{ --header-h:56px; }
   }
 
   /* ===== картинка кейса вместо стандартного ящика (если задана) ===== */
@@ -539,7 +557,7 @@
   }
 
   /* ===== галерея выбора кейса — стартовый экран после входа ===== */
-  .gallery-screen{display:none;max-width:1100px;margin:0 auto;padding:40px 16px 60px;}
+  .gallery-screen{display:none;max-width:1100px;margin:0 auto;padding:calc(var(--header-h) + 24px) 16px 60px;}
   body.browsing-gallery:not(.not-authed) .gallery-screen{display:block;}
   body.browsing-gallery .page{display:none !important;}
   .gallery-wrap{max-width:1100px;margin:0 auto;}
@@ -595,8 +613,18 @@
   </div>
 </div>
 
-<a href="admin.html" class="admin-fab" id="btnAdmin" title="Админ-панель">🛠️</a>
-<button type="button" class="logout-fab" id="btnLogout" title="Выйти">🚪</button>
+<!-- ===== верхняя панель: логотип сайта + действия аккаунта (админка / выход) ===== -->
+<header class="site-header">
+  <div class="brand"><span class="brand-mark"></span><span class="brand-text">КЕЙСЫ</span></div>
+  <div class="header-actions">
+    <a href="admin.html" class="header-btn" id="btnAdmin" title="Админ-панель">
+      <span class="hb-icon">🛠️</span><span class="hb-label">Админ-панель</span>
+    </a>
+    <button type="button" class="header-btn always" id="btnLogout" title="Выйти">
+      <span class="hb-icon">🚪</span><span class="hb-label">Выйти</span>
+    </button>
+  </div>
+</header>
 
 <!-- ===== галерея выбора кейса: показывается сразу после входа ===== -->
 <div class="gallery-screen" id="galleryScreen">
@@ -683,6 +711,10 @@
 <!-- лента открытий — постоянная панель справа; вынесена за пределы .page,
      поэтому остаётся видимой и в галерее выбора кейса, и внутри кейса -->
 <aside class="side-feed" id="sideFeed">
+  <div class="feed-title">
+    <span class="live-dot"></span>
+    <h2>Лента открытий</h2>
+  </div>
   <div class="feed-track-wrap" id="feedTrackWrap">
     <div class="feed-track" id="feedTrack"></div>
   </div>
