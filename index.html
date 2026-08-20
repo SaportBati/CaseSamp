@@ -334,6 +334,7 @@
     transition:border-color .15s ease;
   }
   .field input[type=text]:focus, .field input[type=number]:focus, .field select:focus{outline:none;border-color:var(--accent);}
+  .field input[readonly]{color:var(--text-dim);cursor:not-allowed;background:color-mix(in srgb, var(--panel-2) 80%, black);}
   .field-actions-row{display:flex;gap:8px;}
   .field-actions-row .add-btn{flex:1 1 auto;}
 
@@ -738,10 +739,15 @@
     color:var(--text-dim);text-align:center;margin:0 0 16px;font-weight:700;
   }
   .prize-showcase{
-    display:flex;flex-wrap:wrap;gap:14px;justify-content:center;
+    display:grid;grid-template-columns:repeat(5, 1fr);gap:14px;
+    max-height:min(56vh, 480px);overflow-y:auto;padding:4px 4px 4px 0;
   }
+  .prize-showcase::-webkit-scrollbar{width:8px;}
+  .prize-showcase::-webkit-scrollbar-track{background:transparent;}
+  .prize-showcase::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px;}
+  .prize-showcase::-webkit-scrollbar-thumb:hover{background:var(--accent-dim);}
   .showcase-item{
-    position:relative;width:72px;height:72px;flex:0 0 auto;
+    position:relative;width:100%;aspect-ratio:1/1;flex:0 0 auto;
     display:flex;align-items:center;justify-content:center;
     background:var(--panel-2);border:1px solid var(--line);
     border-bottom:3px solid var(--item-color, var(--accent));
@@ -753,8 +759,8 @@
     box-shadow:0 6px 20px color-mix(in srgb, var(--item-color, var(--accent)) 30%, transparent);
     z-index:2;
   }
-  .showcase-item .dot{width:32px;height:32px;margin-bottom:0;}
-  .showcase-item .thumb{width:50px;height:50px;margin-bottom:0;}
+  .showcase-item .dot{width:38%;height:38%;margin-bottom:0;}
+  .showcase-item .thumb{width:62%;height:62%;margin-bottom:0;}
   .showcase-tooltip{
     position:absolute;left:50%;bottom:calc(100% + 10px);
     transform:translate(-50%,4px);
@@ -772,6 +778,12 @@
   .showcase-item:hover .showcase-tooltip{opacity:1;transform:translate(-50%,0);}
   .showcase-tooltip .st-name{font-size:12.5px;font-weight:700;margin-bottom:3px;}
   .showcase-tooltip .st-chance{font-size:12px;color:var(--accent);font-weight:800;}
+  @media (max-width:640px){
+    .prize-showcase{grid-template-columns:repeat(4, 1fr);}
+  }
+  @media (max-width:420px){
+    .prize-showcase{grid-template-columns:repeat(3, 1fr);}
+  }
 
   /* ===== галерея выбора кейса — стартовый экран после входа ===== */
   .gallery-screen{display:none;max-width:1100px;margin:0 auto;padding:40px 16px 60px;}
@@ -1001,8 +1013,8 @@
                 </select>
               </div>
               <div class="field field-weight">
-                <label>Шанс, %</label>
-                <input type="number" id="pWeight" value="10" min="1" max="1000">
+                <label>Шанс (по редкости)</label>
+                <input type="text" id="pWeight" value="" readonly>
               </div>
               <div class="field field-qty">
                 <label>Количество</label>
@@ -1779,20 +1791,62 @@ window.resolveImageUrl = function(src){
   // логике — DB, отрисовка) теперь не выбирается вручную, а подставляется
   // автоматически по выбранной редкости из фиксированного набора.
   const RARITY_DEFAULT_COLOR = '#9da3ae'; // обычный
+  const RARITY_DEFAULT_ID = 'common';
   const rarityPicker = document.getElementById('rarityPicker');
   const rarityPills = rarityPicker ? Array.from(rarityPicker.querySelectorAll('.rarity-pill')) : [];
+
+  // ===== вес (шанс выпадения) теперь жёстко привязан к редкости =====
+  // Ручного ввода "шанс, %" больше нет — выбрал редкость, получил вес.
+  // Иерархия по возрастанию редкости: common > rare > unique > legendary > secret.
+  // Секретный держим на полу в 1% (минимум, ниже не опускаем), легендарный —
+  // ощутимо выше него, чтобы порядок редкости был однозначным, а не "оба по 1%".
+  // 70% common + 16% rare + 8% unique + 5% legendary + 1% secret = 100%
+  const RARITY_WEIGHTS = {
+    common: 70,
+    rare: 16,
+    unique: 8,
+    legendary: 5,
+    secret: 1
+  };
+  const RARITY_TOTAL_WEIGHT = Object.values(RARITY_WEIGHTS).reduce((s,w)=>s+w,0);
+  // Порядок редкости от самой топовой (секретной) до обычной — используется
+  // и для сортировки списков призов
+  const RARITY_ORDER = ['secret','legendary','unique','rare','common'];
+
+  function rarityIdByColor(color){
+    const normalized = (color || RARITY_DEFAULT_COLOR).toLowerCase();
+    const pill = rarityPills.find(p => p.dataset.color.toLowerCase() === normalized);
+    return pill ? pill.dataset.rarity : null;
+  }
+
+  function weightForRarityId(rarityId){
+    return RARITY_WEIGHTS[rarityId] || RARITY_WEIGHTS[RARITY_DEFAULT_ID];
+  }
+
+  function formatChancePercent(weight){
+    const pct = (weight / RARITY_TOTAL_WEIGHT) * 100;
+    return (pct >= 1 ? pct.toFixed(1) : pct.toFixed(2)).replace(/\.0+$/,'') + '%';
+  }
+
+  // Обновляет информационное поле "Шанс (по редкости)" под выбранную кнопку —
+  // показываем именно %, а не сырое число веса, чтобы не путать (было "800")
+  function updateWeightField(rarityId){
+    pWeight.value = rarityId ? formatChancePercent(weightForRarityId(rarityId)) : '';
+  }
 
   function setActiveRarityByColor(color){
     const normalized = (color || RARITY_DEFAULT_COLOR).toLowerCase();
     let matched = false;
+    let matchedId = null;
     rarityPills.forEach(pill=>{
       const isMatch = pill.dataset.color.toLowerCase() === normalized;
       pill.classList.toggle('is-active', isMatch);
-      if (isMatch) matched = true;
+      if (isMatch) { matched = true; matchedId = pill.dataset.rarity; }
     });
     // Если у приза стоит старый произвольный цвет (не входит в 5 редкостей) —
     // ни одна из кнопок не подсвечивается, но сам цвет не трогаем, пока
     // пользователь сам не выберет одну из редкостей.
+    updateWeightField(matchedId);
     return matched;
   }
 
@@ -1875,6 +1929,12 @@ window.resolveImageUrl = function(src){
     }
   }
 
+  // Сортировка призов от самых топовых (редких) к обычным — по весу
+  // по возрастанию: чем меньше вес, тем реже приз и тем выше он в списке.
+  function sortByRarity(list){
+    return list.slice().sort((a,b)=> a.weight - b.weight);
+  }
+
   // Список возможных призов под кнопкой "Открыть кейс": видна только
   // картинка/кружок приза, при наведении всплывает название и шанс выпадения.
   function renderPrizeShowcase(){
@@ -1882,7 +1942,7 @@ window.resolveImageUrl = function(src){
     prizeShowcase.innerHTML = '';
     if (!prizes.length) return;
     const totalWeight = prizes.reduce((s,p)=>s+p.weight,0) || 1;
-    prizes.forEach(p=>{
+    sortByRarity(prizes).forEach(p=>{
       const item = document.createElement('div');
       item.className = 'showcase-item';
       item.style.setProperty('--item-color', p.color);
@@ -1989,7 +2049,7 @@ window.resolveImageUrl = function(src){
       return;
     }
     const totalWeight = prizes.reduce((s,p)=>s+p.weight,0);
-    prizes.forEach(p=>{
+    sortByRarity(prizes).forEach(p=>{
       const row = document.createElement('div');
       row.className = 'prize-row';
       row.style.setProperty('--row-color', p.color);
@@ -2020,7 +2080,7 @@ window.resolveImageUrl = function(src){
       rm.textContent = '✕';
       rm.addEventListener('click', ()=>{
         window.CaseDB.removePrizeFromCase(currentCase.id, p.id);
-        prizes = prizes.filter(x=>x.id!==p.id);
+        prizes = currentCase.prizes || [];
         if(editingId === p.id) resetForm();
         renderPrizeList();
       });
@@ -2044,7 +2104,6 @@ window.resolveImageUrl = function(src){
     pColor.value = RARITY_DEFAULT_COLOR;
     setActiveRarityByColor(RARITY_DEFAULT_COLOR);
     pImage.value = '';
-    pWeight.value = 10;
     pQty.value = '';
     addBtn.textContent = 'Добавить';
     cancelBtn.style.display = 'none';
@@ -2056,9 +2115,14 @@ window.resolveImageUrl = function(src){
     editingId = p.id;
     pName.value = p.name;
     pColor.value = p.color;
-    setActiveRarityByColor(p.color);
+    const matchedRarity = setActiveRarityByColor(p.color);
+    // Если у приза старый произвольный цвет, не входящий в 5 редкостей —
+    // показываем его фактический вес, пока не выбрана одна из редкостей
+    if(!matchedRarity){
+      const totalWeight = prizes.reduce((s,x)=>s+x.weight,0) || p.weight || 1;
+      pWeight.value = ((p.weight/totalWeight)*100).toFixed(1) + '% · вес ' + p.weight;
+    }
     pImage.value = p.image || '';
-    pWeight.value = p.weight;
     pQty.value = (p.qty === null || p.qty === undefined) ? '' : p.qty;
     addBtn.textContent = 'Сохранить';
     cancelBtn.style.display = 'inline-block';
@@ -2074,9 +2138,10 @@ window.resolveImageUrl = function(src){
     const name = pName.value.trim();
     const color = pColor.value;
     const image = pImage.value.trim();
-    let weight = parseInt(pWeight.value, 10);
     if(!name) { pName.focus(); return; }
-    if(!weight || weight < 1) weight = 1;
+    // Шанс больше не задаётся вручную — берём вес из выбранной редкости
+    const rarityId = rarityIdByColor(color) || RARITY_DEFAULT_ID;
+    const weight = weightForRarityId(rarityId);
     const qtyRaw = pQty.value.trim();
     const qty = qtyRaw === '' ? null : Math.max(0, parseInt(qtyRaw, 10) || 0);
 
@@ -2088,12 +2153,14 @@ window.resolveImageUrl = function(src){
         window.CaseDB.updatePrizeInCase(currentCase.id, p.id, p);
       }
     } else {
-      // Добавление нового приза
+      // Добавление нового приза. addPrizeToCase уже кладёт новый приз
+      // в currentCase.prizes — локальный prizes пересинхронизируем оттуда
+      // (а не push'им ещё раз, иначе приз задваивается).
       const newPrize = window.CaseDB.addPrizeToCase(currentCase.id, {
         name, color, image, weight, qty
       });
       if (newPrize){
-        prizes.push(newPrize);
+        prizes = currentCase.prizes || [];
         idSeq = Math.max(idSeq, newPrize.id + 1);
       }
     }
@@ -2394,6 +2461,12 @@ window.resolveImageUrl = function(src){
     visual.id = 'revealVisual';
     revealCard.insertBefore(visual, revealCard.firstChild);
     revealName.textContent = winner.name;
+    if(winner.qty !== null && winner.qty !== undefined){
+      const badge = document.createElement('span');
+      badge.className = 'qty-badge';
+      badge.textContent = '×' + winner.qty;
+      revealName.appendChild(badge);
+    }
 
     revealOverlay.classList.add('show');
     playFinishSound();
