@@ -200,6 +200,19 @@
 <script>
 const API_BASE_URL = 'https://curly-tooth-4ec5.aaf60251.workers.dev/api';
 
+// ===== редкость призов =====
+// Цвет приза больше не задаётся вручную — только редкость из этого списка.
+// Сервер сам подставляет цвет, соответствующий редкости (см. worker.js).
+const RARITIES = [
+  { id: 'common',    label: 'Комон',       color: '#b0c3d9' },
+  { id: 'rare',      label: 'Рар',         color: '#4b69ff' },
+  { id: 'epic',      label: 'Эпик',        color: '#8847ff' },
+  { id: 'arcane',    label: 'Аркана',      color: '#d32ce6' },
+  { id: 'legendary', label: 'Легендарный', color: '#e4ae39' },
+];
+const RARITY_BY_ID = Object.fromEntries(RARITIES.map(r => [r.id, r]));
+function rarityInfo(id){ return RARITY_BY_ID[id] || RARITY_BY_ID.common; }
+
 let token = null;
 let me = null;
 
@@ -594,8 +607,26 @@ function buildCaseEditor(c){
     return { f, inp };
   };
 
+  // редкость приза выбирается из фиксированного списка вместо
+  // произвольного hex-цвета — цвет сервер подставит сам по редкости
+  const mkRaritySelect = (defaultId) => {
+    const f = document.createElement('div'); f.className='field';
+    f.innerHTML = '<label>Редкость</label>';
+    const inp = document.createElement('select');
+    inp.style.background='var(--panel-2)'; inp.style.border='1px solid var(--line)';
+    inp.style.color='var(--text)'; inp.style.padding='9px 10px'; inp.style.borderRadius='4px'; inp.style.fontSize='14px';
+    RARITIES.forEach(r=>{
+      const opt = document.createElement('option');
+      opt.value = r.id; opt.textContent = r.label;
+      if (r.id === defaultId) opt.selected = true;
+      inp.appendChild(opt);
+    });
+    f.appendChild(inp);
+    return { f, inp };
+  };
+
   const pName = mk('Название приза','text','','200px');
-  const pColor = mk('Цвет','text','#4b69ff','90px');
+  const pRarity = mkRaritySelect('common');
   const pImage = mk('Картинка (URL)','text','','200px');
   const pWeight = mk('Шанс','number','10','70px');
   const pQty = mk('Кол-во','number','','70px');
@@ -607,7 +638,7 @@ function buildCaseEditor(c){
     if (!name) { pName.inp.focus(); return; }
     try{
       await api('/admin/cases/' + c.id + '/prizes', { method:'POST', body:{
-        name, color: pColor.inp.value.trim() || '#4b69ff', image: pImage.inp.value.trim(),
+        name, rarity: pRarity.inp.value, image: pImage.inp.value.trim(),
         weight: parseInt(pWeight.inp.value,10) || 10,
         qty: pQty.inp.value === '' ? null : parseInt(pQty.inp.value,10)
       }});
@@ -616,7 +647,7 @@ function buildCaseEditor(c){
     }catch(e){ setStatus(casesStatus, e.message, true); }
   };
 
-  [pName,pColor,pImage,pWeight,pQty].forEach(x=>pRow.appendChild(x.f));
+  [pName,pRarity,pImage,pWeight,pQty].forEach(x=>pRow.appendChild(x.f));
   pRow.appendChild(btnAddPrize);
   wrap.appendChild(pRow);
 
@@ -628,12 +659,13 @@ function buildCaseEditor(c){
   } else {
     const total = prizes.reduce((s,p)=>s+p.weight,0) || 1;
     prizes.forEach(p=>{
-      const pr = document.createElement('div');
-      pr.className = 'prize-row';
-      pr.style.setProperty('--row-color', p.color);
+      const prRow = document.createElement('div');
+      prRow.className = 'prize-row';
+      prRow.style.setProperty('--row-color', p.color);
 
       const dot = document.createElement('div'); dot.className='dot';
       const pn = document.createElement('div'); pn.className='pn'; pn.textContent = p.name;
+      const prRarity = document.createElement('div'); prRarity.className='pw'; prRarity.style.width='90px'; prRarity.style.color = p.color; prRarity.style.fontWeight='800'; prRarity.textContent = rarityInfo(p.rarity).label;
       const pw = document.createElement('div'); pw.className='pw'; pw.textContent = ((p.weight/total)*100).toFixed(1) + '%';
       const pq = document.createElement('div'); pq.className='pq'; pq.textContent = (p.qty===null||p.qty===undefined) ? '∞' : ('×'+p.qty);
 
@@ -641,13 +673,17 @@ function buildCaseEditor(c){
       btnEdit.title = 'Изменить';
       btnEdit.onclick = async ()=>{
         const newName = prompt('Название приза:', p.name); if (newName===null) return;
-        const newColor = prompt('Цвет (hex):', p.color) || p.color;
+        const rarityIds = RARITIES.map(r=>r.id).join(', ');
+        let newRarity = prompt('Редкость (' + rarityIds + '):', p.rarity || 'common');
+        if (newRarity === null) return;
+        newRarity = newRarity.trim().toLowerCase();
+        if (!RARITY_BY_ID[newRarity]) newRarity = p.rarity || 'common';
         const newImage = prompt('Ссылка на картинку (пусто — без картинки):', p.image || '');
         const newWeight = prompt('Шанс (вес):', p.weight);
         const newQtyRaw = prompt('Количество (пусто — бесконечно):', (p.qty===null||p.qty===undefined)?'':p.qty);
         try{
           await api('/admin/prizes/' + p.id, { method:'PUT', body:{
-            name: newName.trim() || p.name, color: newColor, image: (newImage||'').trim(),
+            name: newName.trim() || p.name, rarity: newRarity, image: (newImage||'').trim(),
             weight: parseInt(newWeight,10) || p.weight,
             qty: (newQtyRaw===null||newQtyRaw.trim()==='') ? null : parseInt(newQtyRaw,10)
           }});
@@ -667,9 +703,9 @@ function buildCaseEditor(c){
         }catch(e){ setStatus(casesStatus, e.message, true); }
       };
 
-      pr.appendChild(dot); pr.appendChild(pn); pr.appendChild(pw); pr.appendChild(pq);
-      pr.appendChild(btnEdit); pr.appendChild(btnDel);
-      list.appendChild(pr);
+      prRow.appendChild(dot); prRow.appendChild(pn); prRow.appendChild(prRarity); prRow.appendChild(pw); prRow.appendChild(pq);
+      prRow.appendChild(btnEdit); prRow.appendChild(btnDel);
+      list.appendChild(prRow);
     });
   }
   wrap.appendChild(list);

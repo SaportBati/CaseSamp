@@ -268,6 +268,7 @@
   }
   @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
   .reveal-label{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-dim);margin-bottom:4px;}
+  .reveal-rarity{font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px;}
   .reveal-name{font-size:20px;font-weight:900;text-transform:uppercase;letter-spacing:.03em;text-align:center;}
   .reveal-actions{display:flex;gap:10px;margin-top:18px;}
   .reveal-btn{
@@ -603,6 +604,10 @@
     width:100%;padding:6px 6px 9px;text-align:center;
     border-top:1px solid var(--line);
   }
+  .showcase-rarity{
+    font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;
+    margin-bottom:2px;
+  }
   .showcase-name{
     font-size:11px;font-weight:700;line-height:1.25;
     display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
@@ -839,6 +844,21 @@ window.resolveImageUrl = function(src){
   }
   return /^https?:\/\//i.test(url) ? url : (window.IMAGES_BASE_URL + url);
 };
+
+// ===== редкость призов =====
+// Цвет каждого приза теперь определяется его редкостью (задаётся в
+// админ-панели) — сервер сам подставляет цвет по редкости. Здесь только
+// подписи для отображения названия редкости рядом с призом.
+window.RARITY_LABELS = {
+  common: 'Комон',
+  rare: 'Рар',
+  epic: 'Эпик',
+  arcane: 'Аркана',
+  legendary: 'Легендарный'
+};
+window.rarityLabel = function(id){
+  return window.RARITY_LABELS[id] || window.RARITY_LABELS.common;
+};
 </script>
 
 <script>
@@ -1030,6 +1050,7 @@ window.resolveImageUrl = function(src){
         const prizes = (Array.isArray(c.prizes) ? c.prizes : []).map((p, j) => ({
           id: j + 1,
           name: p.name,
+          rarity: p.rarity || 'common',
           color: p.color || '#4b69ff',
           image: p.image || null,
           weight: p.weight || 10,
@@ -1527,12 +1548,17 @@ window.resolveImageUrl = function(src){
 
       const info = document.createElement('div');
       info.className = 'showcase-info';
+      const stRarity = document.createElement('div');
+      stRarity.className = 'showcase-rarity';
+      stRarity.style.color = p.color;
+      stRarity.textContent = window.rarityLabel(p.rarity);
       const stName = document.createElement('div');
       stName.className = 'showcase-name';
       stName.textContent = p.name;
       const stChance = document.createElement('div');
       stChance.className = 'showcase-chance';
       stChance.textContent = ((p.weight/totalWeight)*100).toFixed(1) + '%';
+      info.appendChild(stRarity);
       info.appendChild(stName);
       info.appendChild(stChance);
 
@@ -1873,6 +1899,14 @@ window.resolveImageUrl = function(src){
     visual.id = 'revealVisual';
     revealCard.insertBefore(visual, revealCard.firstChild);
     revealName.textContent = winner.name;
+    const oldRarity = document.getElementById('revealRarity');
+    if(oldRarity) oldRarity.remove();
+    const rarityEl = document.createElement('div');
+    rarityEl.id = 'revealRarity';
+    rarityEl.className = 'reveal-rarity';
+    rarityEl.style.color = winner.color;
+    rarityEl.textContent = window.rarityLabel(winner.rarity);
+    revealName.insertAdjacentElement('beforebegin', rarityEl);
     if(winner.qty !== null && winner.qty !== undefined){
       const badge = document.createElement('span');
       badge.className = 'qty-badge';
