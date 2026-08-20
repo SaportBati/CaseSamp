@@ -509,8 +509,8 @@
   }
 
   /* ===== список возможных призов под кнопкой "Открыть кейс" =====
-     в базовом состоянии видна только картинка/кружок приза, при наведении
-     всплывает подсказка с названием и шансом выпадения */
+     каждая карточка сразу показывает картинку/кружок, название приза и
+     шанс выпадения — без наведения (важно для мобильных, где ховера нет) */
   .showcase-panel{margin:0 0 40px;}
   .showcase-title{
     font-size:12px;text-transform:uppercase;letter-spacing:.14em;
@@ -518,7 +518,7 @@
   }
   .prize-showcase{
     display:grid;grid-template-columns:repeat(5, 1fr);gap:14px;
-    max-height:min(56vh, 480px);overflow-y:auto;overflow-x:hidden;
+    max-height:min(64vh, 560px);overflow-y:auto;overflow-x:hidden;
     padding:4px 4px 4px 0;
   }
   .prize-showcase::-webkit-scrollbar{width:8px;}
@@ -526,11 +526,10 @@
   .prize-showcase::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px;}
   .prize-showcase::-webkit-scrollbar-thumb:hover{background:var(--accent-dim);}
   .showcase-item{
-    position:relative;width:100%;aspect-ratio:1/1;flex:0 0 auto;
-    display:flex;align-items:center;justify-content:center;
+    display:flex;flex-direction:column;align-items:center;
     background:var(--panel-2);border:1px solid var(--line);
     border-bottom:3px solid var(--item-color, var(--accent));
-    border-radius:8px;cursor:default;
+    border-radius:8px;cursor:default;overflow:hidden;
     transition:transform .15s ease, box-shadow .15s ease;
   }
   .showcase-item:hover{
@@ -538,30 +537,34 @@
     box-shadow:0 6px 20px color-mix(in srgb, var(--item-color, var(--accent)) 30%, transparent);
     z-index:2;
   }
+  .showcase-visual{
+    position:relative;width:100%;aspect-ratio:1/1;flex:0 0 auto;
+    display:flex;align-items:center;justify-content:center;
+  }
   .showcase-item .dot{width:38%;height:38%;margin-bottom:0;}
   .showcase-item .thumb{width:62%;height:62%;margin-bottom:0;}
-  .showcase-tooltip{
-    position:absolute;left:50%;bottom:calc(100% + 10px);
-    transform:translate(-50%,4px);
-    background:var(--panel);border:1px solid var(--line);
-    border-radius:6px;padding:8px 14px;white-space:nowrap;text-align:center;
-    opacity:0;pointer-events:none;
-    transition:opacity .15s ease, transform .15s ease;
-    box-shadow:0 10px 30px rgba(0,0,0,.45);
+  .showcase-info{
+    width:100%;padding:6px 6px 9px;text-align:center;
+    border-top:1px solid var(--line);
   }
-  .showcase-tooltip::after{
-    content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);
-    border-left:6px solid transparent;border-right:6px solid transparent;
-    border-top:6px solid var(--line);
+  .showcase-name{
+    font-size:11px;font-weight:700;line-height:1.25;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+    overflow:hidden;word-break:break-word;min-height:2.5em;
   }
-  .showcase-item:hover .showcase-tooltip{opacity:1;transform:translate(-50%,0);}
-  .showcase-tooltip .st-name{font-size:12.5px;font-weight:700;margin-bottom:3px;}
-  .showcase-tooltip .st-chance{font-size:12px;color:var(--accent);font-weight:800;}
+  .showcase-chance{
+    font-size:11px;color:var(--accent);font-weight:800;margin-top:3px;
+  }
   @media (max-width:640px){
     .prize-showcase{gap:10px;}
+    .showcase-name{font-size:10px;}
+    .showcase-chance{font-size:10px;}
   }
   @media (max-width:420px){
     .prize-showcase{gap:7px;}
+    .showcase-info{padding:5px 3px 7px;}
+    .showcase-name{font-size:9px;min-height:2.3em;}
+    .showcase-chance{font-size:9.5px;}
   }
 
   /* ===== галерея выбора кейса — стартовый экран после входа ===== */
@@ -1376,8 +1379,8 @@ window.resolveImageUrl = function(src){
     return list.slice().sort((a,b)=> a.weight - b.weight);
   }
 
-  // Список возможных призов под кнопкой "Открыть кейс": видна только
-  // картинка/кружок приза, при наведении всплывает название и шанс выпадения.
+  // Список возможных призов под кнопкой "Открыть кейс": для каждого приза
+  // сразу видно картинку/кружок, название и шанс выпадения.
   function renderPrizeShowcase(){
     if (!prizeShowcase) return;
     prizeShowcase.innerHTML = '';
@@ -1388,20 +1391,23 @@ window.resolveImageUrl = function(src){
       item.className = 'showcase-item';
       item.style.setProperty('--item-color', p.color);
 
-      const visual = visualEl(p, 'strip');
-      const tooltip = document.createElement('div');
-      tooltip.className = 'showcase-tooltip';
+      const visualWrap = document.createElement('div');
+      visualWrap.className = 'showcase-visual';
+      visualWrap.appendChild(visualEl(p, 'strip'));
+
+      const info = document.createElement('div');
+      info.className = 'showcase-info';
       const stName = document.createElement('div');
-      stName.className = 'st-name';
+      stName.className = 'showcase-name';
       stName.textContent = p.name;
       const stChance = document.createElement('div');
-      stChance.className = 'st-chance';
+      stChance.className = 'showcase-chance';
       stChance.textContent = ((p.weight/totalWeight)*100).toFixed(1) + '%';
-      tooltip.appendChild(stName);
-      tooltip.appendChild(stChance);
+      info.appendChild(stName);
+      info.appendChild(stChance);
 
-      item.appendChild(visual);
-      item.appendChild(tooltip);
+      item.appendChild(visualWrap);
+      item.appendChild(info);
       prizeShowcase.appendChild(item);
     });
   }
