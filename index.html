@@ -287,116 +287,6 @@
     color:var(--text-dim);margin:0 0 16px;font-weight:700;
   }
 
-  .theme-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
-  .swatch-input{display:flex;align-items:center;gap:10px;}
-  input[type=color]{
-    -webkit-appearance:none;appearance:none;
-    width:38px;height:38px;border:1px solid var(--line);border-radius:50%;
-    background:none;cursor:pointer;padding:0;overflow:hidden;
-  }
-  input[type=color]::-webkit-color-swatch-wrapper{padding:0;}
-  input[type=color]::-webkit-color-swatch{border:none;border-radius:50%;}
-  .theme-row label{font-size:13px;color:var(--text-dim);}
-  .field-block{display:flex;flex-direction:column;gap:7px;}
-  .field-block-label{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);}
-  .text-input-full{
-    width:100%;background:var(--panel-2);border:1px solid var(--line);color:var(--text);
-    padding:10px 12px;border-radius:6px;font-size:14px;
-  }
-  .text-input-full:focus{outline:none;border-color:var(--accent);}
-  .field-hint{margin:0;font-size:12px;color:var(--text-dim);}
-
-  .edit-note{
-    display:none;
-    align-items:center;justify-content:space-between;gap:10px;
-    background:color-mix(in srgb, var(--accent) 12%, var(--panel-2));
-    border:1px solid var(--accent);border-radius:2px;
-    padding:9px 14px;margin-bottom:14px;
-    font-size:13px;color:var(--text);
-  }
-  .edit-note b{color:var(--accent);}
-
-  .add-form{
-    display:flex;flex-direction:column;gap:14px;
-    background:var(--panel);border:1px solid var(--line);border-radius:6px;
-    padding:14px;margin-bottom:4px;
-  }
-  .add-form-row{
-    display:grid;
-    grid-template-columns: 1.6fr 1fr .8fr .8fr auto;
-    gap:12px;align-items:end;
-  }
-  .field{display:flex;flex-direction:column;gap:6px;min-width:0;}
-  .field label{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);white-space:nowrap;}
-  .field input[type=text], .field input[type=number], .field select{
-    background:var(--panel-2);border:1px solid var(--line);color:var(--text);
-    padding:9px 10px;border-radius:6px;font-size:14px;width:100%;
-    transition:border-color .15s ease;
-  }
-  .field input[type=text]:focus, .field input[type=number]:focus, .field select:focus{outline:none;border-color:var(--accent);}
-  .field input[readonly]{color:var(--text-dim);cursor:not-allowed;background:color-mix(in srgb, var(--panel-2) 80%, black);}
-  .field-actions-row{display:flex;gap:8px;}
-  .field-actions-row .add-btn{flex:1 1 auto;}
-
-  /* ===== выбор редкости приза — цвет теперь задаётся не вручную,
-     а выбором одной из 5 фиксированных редкостей ===== */
-  .field-rarity-wrap{gap:8px;}
-  .rarity-picker{display:flex;flex-wrap:wrap;gap:8px;}
-  .rarity-pill{
-    display:flex;align-items:center;gap:7px;
-    background:var(--panel-2);border:1px solid var(--line);color:var(--text-dim);
-    padding:8px 13px;border-radius:20px;font-size:12.5px;font-weight:700;
-    cursor:pointer;white-space:nowrap;
-    transition:border-color .15s ease, color .15s ease, background .15s ease;
-  }
-  .rarity-dot{width:10px;height:10px;border-radius:50%;flex:0 0 auto;}
-  .rarity-pill:hover{color:var(--text);border-color:color-mix(in srgb, var(--pill-color, var(--accent)) 60%, var(--line));}
-  .rarity-pill.is-active{
-    color:var(--text);
-    border-color:var(--pill-color, var(--accent));
-    background:color-mix(in srgb, var(--pill-color, var(--accent)) 16%, var(--panel-2));
-    box-shadow:0 0 0 1px color-mix(in srgb, var(--pill-color, var(--accent)) 40%, transparent);
-  }
-
-  .add-btn{
-    background:var(--panel-2);border:1px solid var(--line);color:var(--text);
-    padding:9px 18px;border-radius:6px;font-weight:700;text-transform:uppercase;
-    font-size:13px;letter-spacing:.05em;cursor:pointer;height:38px;white-space:nowrap;
-    transition:border-color .15s ease, color .15s ease, background .15s ease, filter .15s ease;
-  }
-  .add-btn:hover{border-color:var(--accent);color:var(--accent);}
-  .add-btn.primary{background:var(--accent);color:#161616;border-color:var(--accent);}
-  .add-btn.primary:hover{filter:brightness(1.1);color:#161616;}
-
-  @media (max-width:820px){
-    .add-form-row{grid-template-columns:1fr 1fr;}
-    .field-name{grid-column:1/-1;}
-    .field-actions{grid-column:1/-1;}
-  }
-  @media (max-width:460px){
-    .add-form-row{grid-template-columns:1fr;}
-  }
-
-  .prize-list{margin-top:16px;display:flex;flex-direction:column;gap:8px;max-height:340px;overflow-y:auto;padding-right:2px;}
-  .prize-row{
-    display:flex;align-items:center;gap:12px;
-    background:var(--panel-2);border:1px solid var(--line);
-    border-left:3px solid var(--row-color, var(--accent));
-    padding:9px 12px;border-radius:6px;
-    transition:background .15s ease, border-color .15s ease;
-  }
-  .prize-row .dot{width:16px;height:16px;border-radius:50%;background:var(--row-color, var(--accent));flex:0 0 auto;}
-  .prize-row .thumb-row{width:30px;height:30px;object-fit:cover;border-radius:5px;flex:0 0 auto;border:1px solid var(--row-color, var(--accent));}
-  .prize-row .rn{flex:1;font-size:14px;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-  .prize-row .rw{font-size:12px;color:var(--text-dim);width:56px;text-align:right;flex:0 0 auto;}
-  .prize-row .rm, .prize-row .re{
-    background:transparent;border:none;color:var(--text-dim);cursor:pointer;
-    font-size:16px;line-height:1;padding:6px 7px;border-radius:5px;flex:0 0 auto;
-    transition:background .15s ease, color .15s ease;
-  }
-  .prize-row .rm:hover{color:var(--danger);background:color-mix(in srgb, var(--danger) 14%, transparent);}
-  .prize-row .re:hover{color:var(--accent);background:color-mix(in srgb, var(--accent) 14%, transparent);}
-  .prize-row.editing{border-left-color:var(--accent);background:color-mix(in srgb, var(--accent) 8%, var(--panel-2));}
   .empty-msg{color:var(--text-dim);font-size:13px;text-align:center;padding:24px 0;}
 
   /* ===== layout: основная колонка; лента открытий — постоянная панель справа (см. .side-feed) ===== */
@@ -408,21 +298,24 @@
     body{padding-right:400px;}
   }
 
-  /* ===== кнопка настроек (шестерёнка), фиксирована в левом верхнем углу ===== */
-  .settings-fab{
+  /* ===== кнопка перехода в админ-панель, видна только администраторам,
+     фиксирована в левом верхнем углу (там, где раньше была шестерёнка
+     настроек кейса) ===== */
+  .admin-fab{
     position:fixed;top:20px;left:20px;z-index:60;
     width:44px;height:44px;border-radius:50%;
     background:var(--panel-2);border:1px solid var(--line);color:var(--text);
-    font-size:19px;cursor:pointer;
-    display:flex;align-items:center;justify-content:center;
+    font-size:19px;cursor:pointer;text-decoration:none;
+    display:none;align-items:center;justify-content:center;
     box-shadow:0 6px 20px rgba(0,0,0,.4);
     transition:border-color .2s ease, color .2s ease, transform .2s ease;
   }
-  .settings-fab:hover{border-color:var(--accent);color:var(--accent);transform:rotate(35deg);}
+  .admin-fab.show{display:flex;}
+  .admin-fab:hover{border-color:var(--accent);color:var(--accent);transform:rotate(15deg);}
 
   /* ===== пока не залогинен — прячем весь сайт, кроме экрана входа ===== */
   body.not-authed .page,
-  body.not-authed .settings-fab,
+  body.not-authed .admin-fab,
   body.not-authed .side-feed{
     display:none !important;
   }
@@ -487,83 +380,6 @@
     .logout-fab{top:12px;left:60px;width:38px;height:38px;font-size:15px;}
   }
 
-  .settings-overlay{
-    position:fixed;inset:0;z-index:70;
-    background:rgba(6,7,10,.68);backdrop-filter:blur(3px);
-    display:flex;align-items:center;justify-content:center;
-    padding:24px;
-    opacity:0;pointer-events:none;
-    transition:opacity .2s ease;
-  }
-  .settings-overlay.show{opacity:1;pointer-events:auto;}
-  body.settings-open{overflow:hidden;}
-  .settings-modal{
-    width:min(760px, 100%);
-    height:min(86vh, 780px);
-    display:flex;flex-direction:column;
-    background:var(--panel);border:1px solid var(--line);border-radius:12px;
-    box-shadow:0 24px 70px rgba(0,0,0,.55);
-    transform:translateY(10px) scale(.98);opacity:0;
-    transition:transform .22s ease, opacity .22s ease;
-    overflow:hidden;
-  }
-  .settings-overlay.show .settings-modal{transform:translateY(0) scale(1);opacity:1;}
-
-  .settings-modal-head{
-    flex:0 0 auto;
-    display:flex;align-items:center;justify-content:space-between;
-    padding:18px 22px;
-    border-bottom:1px solid var(--line);
-    background:linear-gradient(180deg, color-mix(in srgb, var(--accent) 7%, var(--panel)), var(--panel));
-  }
-  .settings-modal-title{display:flex;align-items:center;gap:10px;}
-  .settings-modal-icon{font-size:18px;line-height:1;}
-  .settings-modal-head h2{
-    margin:0;font-size:15px;text-transform:uppercase;letter-spacing:.12em;color:var(--text);font-weight:800;
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  }
-  .settings-back{
-    background:var(--panel-2);border:1px solid var(--line);color:var(--text-dim);
-    width:32px;height:32px;border-radius:8px;font-size:16px;cursor:pointer;
-    display:flex;align-items:center;justify-content:center;line-height:1;flex:0 0 auto;
-    transition:border-color .15s ease, color .15s ease;
-  }
-  .settings-back:hover{border-color:var(--accent);color:var(--accent);}
-  .settings-close{
-    background:var(--panel-2);border:1px solid var(--line);color:var(--text-dim);
-    width:32px;height:32px;border-radius:8px;font-size:16px;cursor:pointer;
-    display:flex;align-items:center;justify-content:center;line-height:1;flex:0 0 auto;
-    transition:border-color .15s ease, color .15s ease;
-  }
-  .settings-close:hover{border-color:var(--danger);color:var(--danger);}
-
-  .settings-body{
-    flex:1 1 auto;min-height:0;
-    overflow-y:auto;
-    padding:20px 22px 24px;
-  }
-  .settings-view{display:none;}
-  .settings-view.is-active{display:block;animation:tabFadeIn .18s ease;}
-  .settings-view#settingsViewEdit .panel{margin-bottom:20px;}
-  .settings-view#settingsViewEdit .panel:last-child{margin-bottom:0;}
-  @keyframes tabFadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
-
-  .settings-modal .panel{margin-bottom:0;border:none;background:none;padding:0;}
-  .settings-modal .panel h2{margin-bottom:14px;}
-  .settings-modal .panel#editorPanel{
-    border:1px solid transparent;border-radius:10px;padding:12px;margin:-12px;
-    transition:border-color .2s ease, background .2s ease;
-  }
-
-  @media (max-width:640px){
-    .settings-overlay{padding:0;}
-    .settings-modal{
-      width:100%;height:100%;max-height:none;border-radius:0;
-    }
-    .settings-modal-head{padding:16px 14px;}
-    .settings-body{padding:16px 14px 20px;}
-  }
-
   /* ===== лента открытий — постоянная панель, закреплена у правого края
      экрана. Видна и в галерее выбора кейса, и внутри конкретного кейса
      (aside вынесен из .page на уровень body — см. разметку). Пополняется
@@ -593,69 +409,6 @@
   .feed-icon-btn:hover{border-color:var(--accent);color:var(--accent);}
   .feed-status{font-size:10.5px;color:var(--accent);letter-spacing:.02em;margin:0 0 10px;min-height:13px;text-align:center;}
   .feed-status:empty{margin:0;}
-  /* ===== выбор кейса в модалке — адаптивная сетка карточек ===== */
-  .case-selector-list{
-    display:grid;
-    grid-template-columns: repeat(auto-fill, minmax(168px, 1fr));
-    gap:14px;
-    margin-top:4px;margin-bottom:16px;
-  }
-  .case-card{
-    display:flex;flex-direction:column;
-    background:var(--panel-2);border:1px solid var(--line);
-    border-radius:8px;overflow:hidden;cursor:pointer;
-    transition:transform .15s ease, box-shadow .15s ease, border-color .15s ease;
-  }
-  .case-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.35);}
-  .case-card.active{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent);}
-  .case-header{
-    height:64px;flex:0 0 auto;
-    display:flex;align-items:center;justify-content:center;
-    background:
-      radial-gradient(120% 140% at 50% 0%, color-mix(in srgb, var(--item-color, var(--accent)) 32%, transparent), transparent 70%),
-      var(--panel);
-    border-bottom:1px solid var(--line);
-    position:relative;
-  }
-  .case-header img{width:38px;height:38px;object-fit:contain;filter:drop-shadow(0 4px 10px rgba(0,0,0,.4));}
-  .case-header .case-header-dot{
-    width:14px;height:14px;border-radius:50%;
-    background:var(--item-color, var(--accent));
-    box-shadow:0 0 12px color-mix(in srgb, var(--item-color, var(--accent)) 70%, transparent);
-  }
-  .case-card.active .case-header::after{
-    content:"✓";position:absolute;top:6px;right:8px;
-    width:18px;height:18px;border-radius:50%;
-    background:var(--accent);color:#161616;font-size:11px;font-weight:900;
-    display:flex;align-items:center;justify-content:center;
-  }
-  .case-content{
-    padding:12px 12px 4px;
-    text-align:center;flex:1 1 auto;
-  }
-  .case-content .case-name{
-    font-size:13px;font-weight:700;
-    margin-bottom:5px;
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  }
-  .case-content .case-stats{
-    font-size:11px;color:var(--text-dim);
-    display:flex;align-items:center;justify-content:center;gap:6px;
-  }
-  .case-actions{
-    display:flex;gap:6px;margin:12px;margin-top:10px;
-  }
-  .case-btn{
-    background:var(--panel);border:1px solid var(--line);color:var(--text);
-    padding:7px 8px;border-radius:6px;font-size:10.5px;text-transform:uppercase;
-    letter-spacing:.03em;font-weight:700;cursor:pointer;flex:1;
-    transition:border-color .15s ease, color .15s ease, background .15s ease;
-  }
-  .case-btn:hover{border-color:var(--accent);color:var(--accent);}
-  .case-btn.primary{background:var(--accent);color:#161616;border-color:var(--accent);}
-  .case-btn.primary:hover{filter:brightness(1.1);}
-  .case-btn.danger:hover{border-color:var(--danger);color:var(--danger);}
-  .create-case-btn{width:100%;padding:11px 18px;}
   .feed-status:empty{margin:0;}
 
   /* лента живая: карточки одна под другой внутри прокручиваемой панели,
@@ -720,7 +473,7 @@
     .feed-track-wrap{max-height:460px;overflow:hidden;}
   }
   @media (max-width:560px){
-    .settings-fab{top:12px;left:12px;width:38px;height:38px;font-size:16px;}
+    .admin-fab{top:12px;left:12px;width:38px;height:38px;font-size:16px;}
   }
 
   /* ===== картинка кейса вместо стандартного ящика (если задана) ===== */
@@ -842,7 +595,7 @@
   </div>
 </div>
 
-<button type="button" class="settings-fab" id="btnSettings" title="Настройки кейса">⚙️</button>
+<a href="admin.html" class="admin-fab" id="btnAdmin" title="Админ-панель">🛠️</a>
 <button type="button" class="logout-fab" id="btnLogout" title="Выйти">🚪</button>
 
 <!-- ===== галерея выбора кейса: показывается сразу после входа ===== -->
@@ -867,9 +620,7 @@
     </div>
     <button type="button" class="case-select-btn" id="btnSelectCase">Все кейсы</button>
   </div>
-  <div class="name-edit">
-    <input id="caseName" type="text" maxlength="40" value="МОЙ КЕЙС">
-  </div>
+
   <div class="nick-edit">
     <label for="nickName">Ник:</label>
     <input id="nickName" type="text" maxlength="24" placeholder="Игрок">
@@ -927,115 +678,6 @@
   </div>
 
 </div>
-</div>
-
-<!-- ===== панель управления (шестерёнка) — вынесена за пределы .page,
-     поэтому открывается из любого места сайта (и из галереи кейсов,
-     и внутри открытого кейса), а не только когда выбран конкретный кейс ===== -->
-<div class="settings-overlay" id="settingsOverlay">
-  <div class="settings-modal">
-    <div class="settings-modal-head">
-      <div class="settings-modal-title">
-        <button type="button" class="settings-back" id="settingsBack" title="Назад к кейсам" style="display:none;">←</button>
-        <span class="settings-modal-icon" id="settingsHeadIcon" aria-hidden="true">📦</span>
-        <h2 id="settingsHeadTitle">Кейсы</h2>
-      </div>
-      <button type="button" class="settings-close" id="settingsClose" title="Закрыть">✕</button>
-    </div>
-
-    <div class="settings-body" id="settingsBody">
-
-      <!-- ЭКРАН 1: список кейсов + создание нового -->
-      <div class="settings-view is-active" id="settingsViewList">
-        <div class="panel">
-          <div class="case-selector-list" id="caseSelectorList">
-            <p style="color:var(--text-dim);font-size:13px;text-align:center;">Загрузка...</p>
-          </div>
-          <button type="button" class="add-btn primary create-case-btn" id="btnCreateCase">+ Создать кейс</button>
-        </div>
-      </div>
-
-      <!-- ЭКРАН 2: редактирование выбранного кейса (открывается кликом по кейсу
-           на экране 1, или сразу после создания нового кейса) -->
-      <div class="settings-view" id="settingsViewEdit">
-
-        <div class="panel">
-          <h2>Оформление кейса</h2>
-          <div class="theme-row">
-            <div class="swatch-input">
-              <input type="color" id="themeColor" value="#e4ae39">
-              <label>Основной цвет кейса</label>
-            </div>
-          </div>
-          <div class="field-block" style="margin-top:16px;">
-            <label class="field-block-label">Ссылка на картинку кейса</label>
-            <input type="text" id="caseImageInput" placeholder="https://.../case.png" class="text-input-full">
-            <p class="field-hint">Сундук, который показывается до открытия кейса</p>
-          </div>
-        </div>
-
-        <div class="panel" id="editorPanel">
-          <h2>Призы в кейсе</h2>
-          <div class="edit-note" id="editNote">
-            <span>Редактируешь приз: <b id="editNoteName"></b></span>
-          </div>
-          <div class="add-form">
-            <div class="field field-rarity-wrap">
-              <label>Редкость приза</label>
-              <div class="rarity-picker" id="rarityPicker">
-                <button type="button" class="rarity-pill is-active" data-rarity="common" data-color="#9da3ae">
-                  <span class="rarity-dot" style="background:#9da3ae;"></span>Обычный
-                </button>
-                <button type="button" class="rarity-pill" data-rarity="rare" data-color="#4be07a">
-                  <span class="rarity-dot" style="background:#4be07a;"></span>Редкий
-                </button>
-                <button type="button" class="rarity-pill" data-rarity="unique" data-color="#8847ff">
-                  <span class="rarity-dot" style="background:#8847ff;"></span>Уникальный
-                </button>
-                <button type="button" class="rarity-pill" data-rarity="legendary" data-color="#e4ae39">
-                  <span class="rarity-dot" style="background:#e4ae39;"></span>Легендарный
-                </button>
-                <button type="button" class="rarity-pill" data-rarity="secret" data-color="#eb4b4b">
-                  <span class="rarity-dot" style="background:#eb4b4b;"></span>Секретный
-                </button>
-              </div>
-              <input type="hidden" id="pColor" value="#9da3ae">
-            </div>
-            <div class="add-form-row">
-              <div class="field field-name">
-                <label>Название приза</label>
-                <input type="text" id="pName" placeholder="Например: AK-47 | Огонь" maxlength="40">
-              </div>
-              <div class="field field-image">
-                <label>Картинка</label>
-                <select id="pImage">
-                  <option value="">Нет</option>
-                </select>
-              </div>
-              <div class="field field-weight">
-                <label>Шанс (по редкости)</label>
-                <input type="text" id="pWeight" value="" readonly>
-              </div>
-              <div class="field field-qty">
-                <label>Количество</label>
-                <input type="number" id="pQty" placeholder="∞" min="0" max="99999">
-              </div>
-              <div class="field field-actions">
-                <label>&nbsp;</label>
-                <div class="field-actions-row">
-                  <button type="button" class="add-btn primary" id="addBtn">Добавить</button>
-                  <button type="button" class="add-btn" id="cancelBtn" style="display:none;">Отмена</button>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="prize-list" id="prizeList"></div>
-        </div>
-
-      </div>
-
-    </div>
-  </div>
 </div>
 
 <!-- лента открытий — постоянная панель справа; вынесена за пределы .page,
@@ -1444,12 +1086,22 @@ window.resolveImageUrl = function(src){
   const authRemember = document.getElementById('authRemember');
   const authError = document.getElementById('authError');
   const btnLogout = document.getElementById('btnLogout');
+  const btnAdmin = document.getElementById('btnAdmin');
   const authSubmitBtn = authForm.querySelector('button[type="submit"], input[type="submit"]');
+
+  // Ссылка на админ-панель видна только тем, у кого аккаунт с правами
+  // администратора (поле isAdmin приходит от сервера вместе с профилем
+  // пользователя при логине/восстановлении сессии).
+  function updateAdminLink(){
+    const user = window.API ? window.API.getCurrentUser() : null;
+    if (btnAdmin) btnAdmin.classList.toggle('show', !!(user && user.isAdmin));
+  }
 
   // Если токен уже сохранён (localStorage) — не спрашивать логин снова
   if (window.API && window.API.isLoggedIn()){
     body.classList.remove('not-authed');
   }
+  updateAdminLink();
 
   authForm.addEventListener('submit', async function(e){
     e.preventDefault();
@@ -1463,6 +1115,7 @@ window.resolveImageUrl = function(src){
 
     if (result && result.token){
       body.classList.remove('not-authed');
+      updateAdminLink();
     } else {
       authError.textContent = (result && result.error) ? result.error : 'Неверный логин или пароль';
       authPassword.value = '';
@@ -1478,23 +1131,21 @@ window.resolveImageUrl = function(src){
     authPassword.value = '';
     authError.textContent = '';
     authLogin.focus();
+    updateAdminLink();
   });
 })();
 
 (function(){
   const root = document.documentElement;
-  const themeColor = document.getElementById('themeColor');
   const openSound = document.getElementById('openSound');
   const tickSound = document.getElementById('tickSound');
   const finishSound = document.getElementById('finishSound');
 
-  // ===== выбор кейса =====
+  // ===== выбор кейса (только просмотр/открытие — управление кейсами
+  // теперь целиком в admin.html) =====
   const btnSelectCase = document.getElementById('btnSelectCase');
-  const btnCreateCase = document.getElementById('btnCreateCase');
-  const caseSelectorList = document.getElementById('caseSelectorList');
   const caseDot = document.getElementById('caseDot');
   const caseNameDisplay = document.getElementById('caseNameDisplay');
-  const caseImageInput = document.getElementById('caseImageInput');
 
   // ===== галерея выбора кейса (стартовый экран) =====
   const galleryGrid = document.getElementById('galleryGrid');
@@ -1565,160 +1216,8 @@ window.resolveImageUrl = function(src){
     }
   });
 
-  // Рендер списка кейсов в модалке (сетка 3 в ряд)
-  function renderCaseSelectorList(){
-    const cases = window.CaseDB.getCases();
-    caseSelectorList.innerHTML = '';
-
-    if (cases.length === 0){
-      caseSelectorList.innerHTML = '<div style="grid-column:1/-1;"><p style="color:var(--text-dim);font-size:13px;text-align:center;">Нет созданных кейсов</p></div>';
-      return;
-    }
-
-    cases.forEach(c => {
-      const card = document.createElement('div');
-      card.className = 'case-card' + (c.id === currentCaseId ? ' active' : '');
-      card.style.setProperty('--item-color', c.color);
-      card.title = 'Открыть «' + c.name + '» для редактирования';
-      // Клик по всей карточке — переход в редактирование этого кейса
-      card.addEventListener('click', ()=> selectCase(c.id));
-
-      const header = document.createElement('div');
-      header.className = 'case-header';
-      if (c.image){
-        const img = document.createElement('img');
-        img.src = window.resolveImageUrl(c.image);
-        img.alt = '';
-        header.appendChild(img);
-      } else {
-        const dot = document.createElement('span');
-        dot.className = 'case-header-dot';
-        header.appendChild(dot);
-      }
-
-      const content = document.createElement('div');
-      content.className = 'case-content';
-
-      const nameEl = document.createElement('div');
-      nameEl.className = 'case-name';
-      nameEl.textContent = c.name;
-
-      const statsEl = document.createElement('div');
-      statsEl.className = 'case-stats';
-      statsEl.innerHTML = `<span>${c.prizes?.length || 0} призов</span>`;
-
-      content.appendChild(nameEl);
-      content.appendChild(statsEl);
-
-      const actions = document.createElement('div');
-      actions.className = 'case-actions';
-      const btnDelete = document.createElement('button');
-      btnDelete.type = 'button';
-      btnDelete.className = 'case-btn danger';
-      btnDelete.textContent = 'Удалить';
-      btnDelete.onclick = (e) => { e.stopPropagation(); deleteCase(c.id, c.name); };
-
-      actions.appendChild(btnDelete);
-
-      card.appendChild(header);
-      card.appendChild(content);
-      card.appendChild(actions);
-      caseSelectorList.appendChild(card);
-    });
-  }
-
-  function selectCase(caseId){
-    currentCaseId = caseId;
-    loadCurrentCase();
-    document.body.classList.remove('browsing-gallery');
-    showCaseEditView();
-  }
-
-  function deleteCase(caseId, caseName){
-    const cases = window.CaseDB.getCases();
-    if (cases.length <= 1){
-      alert('Нельзя удалить последний кейс');
-      return;
-    }
-    if (confirm(`Удалить кейс "${caseName}"?`)){
-      window.CaseDB.deleteCase(caseId);
-      if (currentCaseId === caseId){
-        const newCases = window.CaseDB.getCases();
-        currentCaseId = newCases[0]?.id || 1;
-      }
-      loadCurrentCase();
-      renderCaseSelectorList();
-    }
-  }
-
-  function createCase(){
-    const name = prompt('Введите название нового кейса:', 'НОВЫЙ КЕЙС');
-    if (!name || !name.trim()) return;
-
-    const color = prompt('Введите цвет кейса (hex):', '#e4ae39');
-    const finalColor = color || '#e4ae39';
-
-    const newCase = window.CaseDB.addCase(name, finalColor);
-    currentCaseId = newCase.id;
-    loadCurrentCase();
-    document.body.classList.remove('browsing-gallery');
-    showCaseEditView();
-  }
-
-  // Открытие выбора кейса
+  // Открытие выбора кейса (галерея выбора, для открытия — не редактирование)
   btnSelectCase.addEventListener('click', showGallery);
-  btnCreateCase.addEventListener('click', createCase);
-
-  // ===== модалка настроек (шестерёнка) =====
-  const btnSettings = document.getElementById('btnSettings');
-  const settingsOverlay = document.getElementById('settingsOverlay');
-  const settingsClose = document.getElementById('settingsClose');
-  const settingsBack = document.getElementById('settingsBack');
-  const settingsHeadTitle = document.getElementById('settingsHeadTitle');
-  const settingsHeadIcon = document.getElementById('settingsHeadIcon');
-  const settingsViewList = document.getElementById('settingsViewList');
-  const settingsViewEdit = document.getElementById('settingsViewEdit');
-
-  // Экран 1 — список всех кейсов с кнопкой "+ Создать кейс".
-  function showCaseListView(){
-    settingsViewEdit.classList.remove('is-active');
-    settingsViewList.classList.add('is-active');
-    settingsBack.style.display = 'none';
-    settingsHeadIcon.textContent = '📦';
-    settingsHeadTitle.textContent = 'Кейсы';
-    renderCaseSelectorList();
-  }
-  // Экран 2 — редактирование конкретного кейса (цвет, картинка, призы),
-  // открывается кликом по кейсу на экране 1 или сразу после его создания.
-  function showCaseEditView(){
-    settingsViewList.classList.remove('is-active');
-    settingsViewEdit.classList.add('is-active');
-    settingsBack.style.display = 'flex';
-    settingsHeadIcon.textContent = '✎';
-    settingsHeadTitle.textContent = currentCase ? currentCase.name : 'Редактирование';
-  }
-
-  function openSettings(){
-    settingsOverlay.classList.add('show');
-    document.body.classList.add('settings-open');
-    // Панель всегда открывается со списка кейсов — оттуда либо создаём
-    // новый, либо кликаем на существующий, чтобы попасть в его редактирование.
-    showCaseListView();
-  }
-  function closeSettings(){
-    settingsOverlay.classList.remove('show');
-    document.body.classList.remove('settings-open');
-  }
-
-  btnSettings.addEventListener('click', openSettings);
-  settingsClose.addEventListener('click', closeSettings);
-  settingsBack.addEventListener('click', showCaseListView);
-  settingsOverlay.addEventListener('click', (e)=>{
-    if(e.target === settingsOverlay) closeSettings();
-  });
-  document.addEventListener('keydown', (e)=>{
-    if(e.key === 'Escape') closeSettings();
-  });
 
   // Теперь звук разбит на 3 отдельных файла вместо одного трека с таймингами:
   //  - openSound  (open.mp3)   — играет один раз в момент тряски/открытия кейса
@@ -1773,110 +1272,22 @@ window.resolveImageUrl = function(src){
   const btnAgain = document.getElementById('btnAgain');
   const btnClose = document.getElementById('btnClose');
 
-  const editorPanel = document.getElementById('editorPanel');
-  const editNote = document.getElementById('editNote');
-  const editNoteName = document.getElementById('editNoteName');
-
-  const pName = document.getElementById('pName');
-  const pColor = document.getElementById('pColor');
-  const pImage = document.getElementById('pImage');
-  const pWeight = document.getElementById('pWeight');
-  const pQty = document.getElementById('pQty');
-  const addBtn = document.getElementById('addBtn');
-  const cancelBtn = document.getElementById('cancelBtn');
-  const prizeListEl = document.getElementById('prizeList');
-
-  // ===== редкость приза вместо ручного выбора цвета =====
-  // Цвет приза (поле pColor, как и раньше используется во всей остальной
-  // логике — DB, отрисовка) теперь не выбирается вручную, а подставляется
-  // автоматически по выбранной редкости из фиксированного набора.
-  const RARITY_DEFAULT_COLOR = '#9da3ae'; // обычный
-  const RARITY_DEFAULT_ID = 'common';
-  const rarityPicker = document.getElementById('rarityPicker');
-  const rarityPills = rarityPicker ? Array.from(rarityPicker.querySelectorAll('.rarity-pill')) : [];
-
-  // ===== вес (шанс выпадения) теперь жёстко привязан к редкости =====
-  // Ручного ввода "шанс, %" больше нет — выбрал редкость, получил вес.
-  // Иерархия по возрастанию редкости: common > rare > unique > legendary > secret.
-  // Секретный держим на полу в 1% (минимум, ниже не опускаем), легендарный —
-  // ощутимо выше него, чтобы порядок редкости был однозначным, а не "оба по 1%".
-  // 70% common + 16% rare + 8% unique + 5% legendary + 1% secret = 100%
-  const RARITY_WEIGHTS = {
-    common: 70,
-    rare: 16,
-    unique: 8,
-    legendary: 5,
-    secret: 1
-  };
-  const RARITY_TOTAL_WEIGHT = Object.values(RARITY_WEIGHTS).reduce((s,w)=>s+w,0);
-  // Порядок редкости от самой топовой (секретной) до обычной — используется
-  // и для сортировки списков призов
-  const RARITY_ORDER = ['secret','legendary','unique','rare','common'];
-
-  function rarityIdByColor(color){
-    const normalized = (color || RARITY_DEFAULT_COLOR).toLowerCase();
-    const pill = rarityPills.find(p => p.dataset.color.toLowerCase() === normalized);
-    return pill ? pill.dataset.rarity : null;
-  }
-
-  function weightForRarityId(rarityId){
-    return RARITY_WEIGHTS[rarityId] || RARITY_WEIGHTS[RARITY_DEFAULT_ID];
-  }
-
-  function formatChancePercent(weight){
-    const pct = (weight / RARITY_TOTAL_WEIGHT) * 100;
-    return (pct >= 1 ? pct.toFixed(1) : pct.toFixed(2)).replace(/\.0+$/,'') + '%';
-  }
-
-  // Обновляет информационное поле "Шанс (по редкости)" под выбранную кнопку —
-  // показываем именно %, а не сырое число веса, чтобы не путать (было "800")
-  function updateWeightField(rarityId){
-    pWeight.value = rarityId ? formatChancePercent(weightForRarityId(rarityId)) : '';
-  }
-
-  function setActiveRarityByColor(color){
-    const normalized = (color || RARITY_DEFAULT_COLOR).toLowerCase();
-    let matched = false;
-    let matchedId = null;
-    rarityPills.forEach(pill=>{
-      const isMatch = pill.dataset.color.toLowerCase() === normalized;
-      pill.classList.toggle('is-active', isMatch);
-      if (isMatch) { matched = true; matchedId = pill.dataset.rarity; }
-    });
-    // Если у приза стоит старый произвольный цвет (не входит в 5 редкостей) —
-    // ни одна из кнопок не подсвечивается, но сам цвет не трогаем, пока
-    // пользователь сам не выберет одну из редкостей.
-    updateWeightField(matchedId);
-    return matched;
-  }
-
-  rarityPills.forEach(pill=>{
-    pill.style.setProperty('--pill-color', pill.dataset.color);
-    pill.addEventListener('click', ()=>{
-      pColor.value = pill.dataset.color;
-      setActiveRarityByColor(pill.dataset.color);
-    });
-  });
-
-
-  const caseNameInput = document.getElementById('caseName');
   const nickInput = document.getElementById('nickName');
   const feedTrack = document.getElementById('feedTrack');
   const feedTrackWrap = document.getElementById('feedTrackWrap');
 
-  // ===== РАБОТА С КЕЙСАМИ =====
+  // ===== РАБОТА С КЕЙСАМИ (только просмотр/открытие — создание, удаление
+  // и редактирование призов теперь только в admin.html) =====
   let currentCaseId = 1; // по умолчанию первый кейс
   let currentCase = null;
   let prizes = []; // призы текущего кейса
-  let idSeq = 1;
   let spinning = false;
-  let editingId = null;
 
   // Загрузка текущего кейса
   function loadCurrentCase(){
     const cases = window.CaseDB.getCases();
     if (cases.length === 0){
-      // Кейсы из cases.json ещё не подгрузились — ничего не создаём,
+      // Кейсы из D1 ещё не подгрузились — ничего не создаём,
       // просто ждём событие cases-db-ready, оно вызовет loadCurrentCase снова
       currentCase = null;
       prizes = [];
@@ -1892,21 +1303,11 @@ window.resolveImageUrl = function(src){
     updateCaseNameDisplay();
     updateThemeFromCase();
     applyCaseHeroImage();
-    renderPrizeList();
+    updateOpenState();
     renderPrizeShowcase();
-    // Обновить UI модалки если она открыта: список кейсов — если открыт
-    // экран списка, заголовок с названием — если открыт экран редактирования
-    if (settingsOverlay.classList.contains('show')){
-      if (settingsViewList.classList.contains('is-active')){
-        renderCaseSelectorList();
-      } else if (settingsHeadTitle){
-        settingsHeadTitle.textContent = currentCase.name;
-      }
-    }
     // Обновить отображение текущего кейса
     caseNameDisplay.textContent = currentCase.name;
     caseDot.style.backgroundColor = currentCase.color;
-    if (caseImageInput) caseImageInput.value = currentCase.image || '';
   }
 
   // Картинка кейса (сундука) вместо стандартного ящика — показывается в
@@ -1968,7 +1369,6 @@ window.resolveImageUrl = function(src){
   // Обновление названия кейса в UI
   function updateCaseNameDisplay(){
     if (currentCase){
-      caseNameInput.value = currentCase.name;
       applyTheme(currentCase.color);
     }
   }
@@ -1978,7 +1378,6 @@ window.resolveImageUrl = function(src){
     const safeColor = color || '#e4ae39';
     root.style.setProperty('--accent', safeColor);
     root.style.setProperty('--accent-dim', safeColor);
-    themeColor.value = safeColor;
   }
 
   // Получение цвета из текущего кейса
@@ -1989,23 +1388,6 @@ window.resolveImageUrl = function(src){
   // Обновление темы из текущего кейса
   function updateThemeFromCase(){
     applyTheme(getCaseColor());
-  }
-
-  // ---- load available image names from images-config.js into the dropdown ----
-  const available = Array.isArray(window.CASE_IMAGES) ? window.CASE_IMAGES : [];
-  available.forEach(name=>{
-    const opt = document.createElement('option');
-    opt.value = name;
-    opt.textContent = name;
-    pImage.appendChild(opt);
-  });
-  if (caseImageInput){
-    caseImageInput.addEventListener('change', function(){
-      if (!currentCase) return;
-      window.CaseDB.updateCase(currentCase.id, { image: this.value.trim() });
-      loadCurrentCase();
-      renderGallery();
-    });
   }
 
   function updateOpenState(){
@@ -2036,152 +1418,6 @@ window.resolveImageUrl = function(src){
     dot.className = dotClass;
     return dot;
   }
-
-  function renderPrizeList(){
-    prizeListEl.innerHTML = '';
-    if(prizes.length === 0){
-      const e = document.createElement('div');
-      e.className = 'empty-msg';
-      e.textContent = 'Пока пусто — добавьте первый приз выше';
-      prizeListEl.appendChild(e);
-      updateOpenState();
-      renderPrizeShowcase();
-      return;
-    }
-    const totalWeight = prizes.reduce((s,p)=>s+p.weight,0);
-    sortByRarity(prizes).forEach(p=>{
-      const row = document.createElement('div');
-      row.className = 'prize-row';
-      row.style.setProperty('--row-color', p.color);
-
-      const visual = visualEl(p, 'row');
-      const rn = document.createElement('div');
-      rn.className = 'rn';
-      rn.textContent = p.name;
-      if(p.qty !== null && p.qty !== undefined && p.qty !== ''){
-        const badge = document.createElement('span');
-        badge.className = 'qty-badge';
-        badge.textContent = '×' + p.qty;
-        rn.appendChild(badge);
-      }
-      const rw = document.createElement('div');
-      rw.className = 'rw';
-      rw.textContent = ((p.weight/totalWeight)*100).toFixed(1) + '%';
-      const re = document.createElement('button');
-      re.type = 'button';
-      re.className = 're';
-      re.title = 'Изменить';
-      re.textContent = '✎';
-      re.addEventListener('click', ()=> enterEditMode(p));
-      const rm = document.createElement('button');
-      rm.type = 'button';
-      rm.className = 'rm';
-      rm.title = 'Удалить';
-      rm.textContent = '✕';
-      rm.addEventListener('click', ()=>{
-        window.CaseDB.removePrizeFromCase(currentCase.id, p.id);
-        prizes = currentCase.prizes || [];
-        if(editingId === p.id) resetForm();
-        renderPrizeList();
-      });
-
-      if(p.id === editingId) row.classList.add('editing');
-
-      row.appendChild(visual);
-      row.appendChild(rn);
-      row.appendChild(rw);
-      row.appendChild(re);
-      row.appendChild(rm);
-      prizeListEl.appendChild(row);
-    });
-    updateOpenState();
-    renderPrizeShowcase();
-  }
-
-  function resetForm(){
-    editingId = null;
-    pName.value = '';
-    pColor.value = RARITY_DEFAULT_COLOR;
-    setActiveRarityByColor(RARITY_DEFAULT_COLOR);
-    pImage.value = '';
-    pQty.value = '';
-    addBtn.textContent = 'Добавить';
-    cancelBtn.style.display = 'none';
-    editNote.style.display = 'none';
-    editorPanel.style.borderColor = '';
-  }
-
-  function enterEditMode(p){
-    editingId = p.id;
-    pName.value = p.name;
-    pColor.value = p.color;
-    const matchedRarity = setActiveRarityByColor(p.color);
-    // Если у приза старый произвольный цвет, не входящий в 5 редкостей —
-    // показываем его фактический вес, пока не выбрана одна из редкостей
-    if(!matchedRarity){
-      const totalWeight = prizes.reduce((s,x)=>s+x.weight,0) || p.weight || 1;
-      pWeight.value = ((p.weight/totalWeight)*100).toFixed(1) + '% · вес ' + p.weight;
-    }
-    pImage.value = p.image || '';
-    pQty.value = (p.qty === null || p.qty === undefined) ? '' : p.qty;
-    addBtn.textContent = 'Сохранить';
-    cancelBtn.style.display = 'inline-block';
-    editNote.style.display = 'flex';
-    editNoteName.textContent = p.name;
-    editorPanel.style.borderColor = 'var(--accent)';
-    renderPrizeList();
-    editorPanel.scrollIntoView({behavior:'smooth', block:'center'});
-    pName.focus();
-  }
-
-  addBtn.addEventListener('click', ()=>{
-    const name = pName.value.trim();
-    const color = pColor.value;
-    const image = pImage.value.trim();
-    if(!name) { pName.focus(); return; }
-    // Шанс больше не задаётся вручную — берём вес из выбранной редкости
-    const rarityId = rarityIdByColor(color) || RARITY_DEFAULT_ID;
-    const weight = weightForRarityId(rarityId);
-    const qtyRaw = pQty.value.trim();
-    const qty = qtyRaw === '' ? null : Math.max(0, parseInt(qtyRaw, 10) || 0);
-
-    if(editingId !== null){
-      // Обновление существующего приза
-      const p = prizes.find(x=>x.id === editingId);
-      if(p){
-        p.name = name; p.color = color; p.image = image; p.weight = weight; p.qty = qty;
-        window.CaseDB.updatePrizeInCase(currentCase.id, p.id, p);
-      }
-    } else {
-      // Добавление нового приза. addPrizeToCase уже кладёт новый приз
-      // в currentCase.prizes — локальный prizes пересинхронизируем оттуда
-      // (а не push'им ещё раз, иначе приз задваивается).
-      const newPrize = window.CaseDB.addPrizeToCase(currentCase.id, {
-        name, color, image, weight, qty
-      });
-      if (newPrize){
-        prizes = currentCase.prizes || [];
-        idSeq = Math.max(idSeq, newPrize.id + 1);
-      }
-    }
-    resetForm();
-    pName.focus();
-    renderPrizeList();
-  });
-  cancelBtn.addEventListener('click', ()=>{
-    resetForm();
-    renderPrizeList();
-  });
-  pName.addEventListener('keydown', (e)=>{ if(e.key==='Enter') addBtn.click(); });
-
-  // Обновление названия кейса при редактировании
-  caseNameInput.addEventListener('input', function(){
-    const newName = this.value.trim();
-    if (newName && currentCase && newName !== currentCase.name){
-      window.CaseDB.updateCase(currentCase.id, { name: newName });
-      loadCurrentCase();
-    }
-  });
 
   function weightedPick(){
     const total = prizes.reduce((s,p)=>s+p.weight,0);
@@ -2377,7 +1613,7 @@ window.resolveImageUrl = function(src){
   async function addToFeed(winner){
     const payload = {
       nickname: (nickInput.value || '').trim() || 'Игрок',
-      caseName: (caseNameInput.value || '').trim() || (currentCase ? currentCase.name : ''),
+      caseName: currentCase ? currentCase.name : '',
       name: winner.name,
       color: winner.color,
       image: winner.image || '',
@@ -2519,7 +1755,8 @@ window.resolveImageUrl = function(src){
 
   // ===== ИНИЦИАЛИЗАЦИЯ КЕЙСОВ ПРИ ЗАГРУЗКЕ =====
   loadCurrentCase();
-  renderPrizeList();
+  updateOpenState();
+  renderPrizeShowcase();
   renderGallery();
 })();
 </script>
