@@ -525,6 +525,62 @@
   .prize-showcase::-webkit-scrollbar-track{background:transparent;}
   .prize-showcase::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px;}
   .prize-showcase::-webkit-scrollbar-thumb:hover{background:var(--accent-dim);}
+
+  /* ===== громкость: колонка справа от прокручиваемого списка призов =====
+     ползунок расположен вертикально (крутится тем же нативным <input
+     type=range>, что и обычный горизонтальный, просто повёрнут через
+     transform — см. .volume-slider-wrap), значение хранится в localStorage
+     и применяется ко всем трём звукам (open/tick/finish) сразу ===== */
+  .showcase-body{display:flex;align-items:stretch;gap:16px;}
+  .showcase-body .prize-showcase{flex:1 1 auto;min-width:0;}
+  .volume-control{
+    flex:0 0 auto;width:58px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:10px;padding:16px 8px;
+    background:var(--panel-2);border:1px solid var(--line);border-radius:8px;
+  }
+  .volume-icon-btn{
+    background:transparent;border:none;color:var(--text-dim);
+    font-size:16px;line-height:1;padding:2px;cursor:pointer;
+  }
+  .volume-icon-btn:hover{color:var(--accent);}
+  .volume-slider-wrap{
+    position:relative;width:100%;height:150px;flex:0 0 auto;
+  }
+  #volumeSlider{
+    position:absolute;top:50%;left:50%;
+    width:150px;height:18px;margin:0;padding:0;
+    transform:translate(-50%,-50%) rotate(-90deg);
+    -webkit-appearance:none;appearance:none;
+    background:transparent;cursor:pointer;
+  }
+  #volumeSlider:focus{outline:none;}
+  #volumeSlider::-webkit-slider-runnable-track{height:4px;border-radius:2px;background:var(--line);}
+  #volumeSlider::-webkit-slider-thumb{
+    -webkit-appearance:none;appearance:none;
+    width:15px;height:15px;border-radius:50%;
+    background:var(--accent);border:2px solid #14151a;
+    margin-top:-5.5px;cursor:pointer;
+    box-shadow:0 0 8px color-mix(in srgb, var(--accent) 65%, transparent);
+  }
+  #volumeSlider::-moz-range-track{height:4px;border-radius:2px;background:var(--line);}
+  #volumeSlider::-moz-range-thumb{
+    width:15px;height:15px;border-radius:50%;
+    background:var(--accent);border:2px solid #14151a;cursor:pointer;
+    box-shadow:0 0 8px color-mix(in srgb, var(--accent) 65%, transparent);
+  }
+  .volume-value{font-size:10px;color:var(--text-dim);font-weight:800;letter-spacing:.02em;white-space:nowrap;}
+  @media (max-width:640px){
+    .showcase-body{flex-direction:column;}
+    .volume-control{
+      width:100%;flex-direction:row;justify-content:center;padding:10px 16px;
+    }
+    .volume-slider-wrap{width:auto;height:auto;flex:1 1 auto;max-width:220px;}
+    #volumeSlider{
+      position:static;width:100%;height:18px;
+      transform:none;
+    }
+  }
   .showcase-item{
     display:flex;flex-direction:column;align-items:center;
     background:var(--panel-2);border:1px solid var(--line);
@@ -713,7 +769,18 @@
 
   <div class="showcase-panel">
     <h2 class="showcase-title">Возможные призы</h2>
-    <div class="prize-showcase" id="prizeShowcase"></div>
+    <div class="showcase-body">
+      <div class="prize-showcase" id="prizeShowcase"></div>
+      <div class="volume-control" title="Громкость звука">
+        <button type="button" class="volume-icon-btn" id="volumeIconBtn" aria-label="Выключить звук">
+          <span id="volumeIcon">🔊</span>
+        </button>
+        <div class="volume-slider-wrap">
+          <input type="range" id="volumeSlider" min="0" max="100" step="1" value="60" aria-label="Громкость звука">
+        </div>
+        <div class="volume-value" id="volumeValue">60%</div>
+      </div>
+    </div>
   </div>
 
 </div>
@@ -1295,6 +1362,69 @@ window.resolveImageUrl = function(src){
   function stopAllSounds(){
     [openSound, finishSound].forEach(a=>{
       try{ a.pause(); a.currentTime = 0; }catch(e){}
+    });
+  }
+
+  // ===== громкость звука: общий ползунок для open/tick/finish, значение
+  // сохраняется в localStorage и подхватывается при следующем визите =====
+  const VOLUME_STORAGE_KEY = 'case_opener_volume';
+  const volumeSlider = document.getElementById('volumeSlider');
+  const volumeIconBtn = document.getElementById('volumeIconBtn');
+  const volumeIcon = document.getElementById('volumeIcon');
+  const volumeValue = document.getElementById('volumeValue');
+  let lastNonZeroVolume = 60;
+
+  function volumeIconFor(pct){
+    if (pct <= 0) return '🔇';
+    if (pct < 50) return '🔉';
+    return '🔊';
+  }
+
+  function applyVolume(pct){
+    const clamped = Math.max(0, Math.min(100, pct));
+    const v = clamped / 100;
+    [openSound, tickSound, finishSound].forEach(a=>{ if (a) a.volume = v; });
+    if (volumeValue) volumeValue.textContent = Math.round(clamped) + '%';
+    if (volumeIcon) volumeIcon.textContent = volumeIconFor(clamped);
+    if (volumeSlider && Number(volumeSlider.value) !== clamped) volumeSlider.value = clamped;
+    if (clamped > 0) lastNonZeroVolume = clamped;
+  }
+
+  function saveVolume(pct){
+    try{ localStorage.setItem(VOLUME_STORAGE_KEY, String(pct)); }catch(e){}
+  }
+
+  function loadVolume(){
+    try{
+      const saved = localStorage.getItem(VOLUME_STORAGE_KEY);
+      if (saved !== null){
+        const n = parseInt(saved, 10);
+        if (!isNaN(n)) return Math.max(0, Math.min(100, n));
+      }
+    }catch(e){}
+    return 60; // громкость по умолчанию для новых посетителей
+  }
+
+  (function initVolume(){
+    const initial = loadVolume();
+    if (initial > 0) lastNonZeroVolume = initial;
+    applyVolume(initial);
+  })();
+
+  if (volumeSlider){
+    volumeSlider.addEventListener('input', ()=>{
+      const pct = Number(volumeSlider.value);
+      applyVolume(pct);
+      saveVolume(pct);
+    });
+  }
+
+  if (volumeIconBtn){
+    volumeIconBtn.addEventListener('click', ()=>{
+      const current = volumeSlider ? Number(volumeSlider.value) : 0;
+      const next = current > 0 ? 0 : (lastNonZeroVolume || 60);
+      applyVolume(next);
+      saveVolume(next);
     });
   }
 
