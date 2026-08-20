@@ -84,7 +84,6 @@
     .case-display .case-name{max-width:38vw;}
     .case-display, .case-select-btn{padding:5px 10px;font-size:11px;}
   }
-  /* ===== STAGE (crate <-> reel crossfade) ===== */
   .stage-area{
     position:relative;
     height:300px;
@@ -150,7 +149,6 @@
 
   .hint{text-align:center;color:var(--text-dim);font-size:13px;margin:-24px 0 40px;}
 
-  /* ===== REEL ===== */
   .stage-reel{
     position:absolute;inset:0;
     display:flex;align-items:center;
@@ -230,7 +228,6 @@
     word-break:break-word;
   }
 
-  /* ===== REVEAL (overlay on top of the dimmed reel) ===== */
   .reveal-overlay{
     position:absolute;inset:0;z-index:5;
     display:flex;align-items:center;justify-content:center;
@@ -281,7 +278,6 @@
   .reveal-btn.primary{background:var(--accent);color:#161616;border-color:var(--accent);}
   .reveal-btn.primary:hover{filter:brightness(1.1);color:#161616;}
 
-  /* ===== PANELS ===== */
   .panel{
     background:var(--panel);
     border:1px solid var(--line);
@@ -297,19 +293,12 @@
 
   .empty-msg{color:var(--text-dim);font-size:13px;text-align:center;padding:24px 0;}
 
-  /* ===== layout: основная колонка; лента открытий — постоянная панель справа (см. .side-feed) ===== */
   .page{max-width:920px;margin:0 auto;padding-top:calc(var(--header-h) + 28px);}
 
-  /* на широких экранах резервируем место под фиксированную ленту справа —
-     резерв общий для body, поэтому действует и на .page, и на .gallery-screen */
   @media (min-width:1300px){
     body{padding-right:400px;}
   }
 
-  /* ===== верхняя панель сайта: логотип слева, действия аккаунта справа.
-     Занимает всю ширину (в т.ч. поверх ленты открытий), поэтому кнопки
-     админки/выхода больше не висят одинокими кружками в углу, а сидят в
-     общей полосе интерфейса — как в admin.html ===== */
   :root{ --header-h:64px; }
   .site-header{
     position:fixed;top:0;left:0;right:0;z-index:70;
@@ -352,14 +341,12 @@
     .header-btn .hb-label{display:none;}
   }
 
-  /* ===== пока не залогинен — прячем весь сайт, кроме экрана входа ===== */
   body.not-authed .page,
   body.not-authed .site-header,
   body.not-authed .side-feed{
     display:none !important;
   }
 
-  /* ===== экран входа ===== */
   .auth-overlay{
     position:fixed;inset:0;z-index:200;
     background:
@@ -404,10 +391,6 @@
   }
   .auth-remember input{width:14px;height:14px;}
 
-  /* ===== лента открытий — постоянная панель, закреплена у правого края
-     экрана. Видна и в галерее выбора кейса, и внутри конкретного кейса
-     (aside вынесен из .page на уровень body — см. разметку). Пополняется
-     живыми открытиями всех игроков, приходящими с сервера. ===== */
   .side-feed{
     position:fixed;top:var(--header-h);right:0;bottom:0;z-index:45;
     width:400px;height:calc(100vh - var(--header-h));
@@ -437,8 +420,7 @@
   .feed-status{font-size:10.5px;color:var(--accent);letter-spacing:.02em;margin:0 0 10px;min-height:13px;text-align:center;}
   .feed-status:empty{margin:0;}
 
-  /* лента живая: карточки одна под другой внутри прокручиваемой панели,
-     новые открытия (свои и чужие — приходят с сервера) добавляются сверху */
+
   .feed-track-wrap{
     position:relative;flex:1 1 auto;min-height:0;
     border:none;border-radius:0;
@@ -446,8 +428,7 @@
     background:transparent;
   }
   .feed-track{display:flex;flex-direction:column;}
-  /* когда карточки не влезают в видимую область, лента дублируется и
-     плавно, бесконечно "перетекает" вниз — см. renderFeedTrack() в скрипте */
+
   .feed-track.marquee{
     animation: feedMarquee var(--marquee-duration, 30s) linear infinite;
   }
@@ -502,16 +483,12 @@
     :root{ --header-h:56px; }
   }
 
-  /* ===== картинка кейса вместо стандартного ящика (если задана) ===== */
   .crate-visual{width:100%;height:100%;display:flex;align-items:center;justify-content:center;}
   .crate-visual img{
     width:100%;height:100%;object-fit:contain;
     filter:drop-shadow(0 0 24px color-mix(in srgb, var(--accent) 55%, transparent));
   }
 
-  /* ===== список возможных призов под кнопкой "Открыть кейс" =====
-     каждая карточка сразу показывает картинку/кружок, название приза и
-     шанс выпадения — без наведения (важно для мобильных, где ховера нет) */
   .showcase-panel{margin:0 0 40px;}
   .showcase-title{
     font-size:12px;text-transform:uppercase;letter-spacing:.14em;
@@ -527,11 +504,6 @@
   .prize-showcase::-webkit-scrollbar-thumb{background:var(--line);border-radius:4px;}
   .prize-showcase::-webkit-scrollbar-thumb:hover{background:var(--accent-dim);}
 
-  /* ===== громкость: колонка справа от прокручиваемого списка призов =====
-     ползунок расположен вертикально (крутится тем же нативным <input
-     type=range>, что и обычный горизонтальный, просто повёрнут через
-     transform — см. .volume-slider-wrap), значение хранится в localStorage
-     и применяется ко всем трём звукам (open/tick/finish) сразу ===== */
   .showcase-body{display:flex;align-items:stretch;gap:16px;}
   .showcase-body .prize-showcase{flex:1 1 auto;min-width:0;}
   .volume-control{
@@ -628,7 +600,6 @@
     .showcase-chance{font-size:9.5px;}
   }
 
-  /* ===== галерея выбора кейса — стартовый экран после входа ===== */
   .gallery-screen{display:none;max-width:1100px;margin:0 auto;padding:calc(var(--header-h) + 24px) 16px 60px;}
   body.browsing-gallery:not(.not-authed) .gallery-screen{display:block;}
   body.browsing-gallery .page{display:none !important;}
@@ -661,7 +632,6 @@
 </head>
 <body class="not-authed browsing-gallery">
 
-<!-- ===== экран входа: показывается, пока не введён верный логин/пароль ===== -->
 <div class="auth-overlay" id="authOverlay">
   <div class="auth-box">
     <h1>Вход</h1>
@@ -685,7 +655,6 @@
   </div>
 </div>
 
-<!-- ===== верхняя панель: логотип сайта + действия аккаунта (админка / выход) ===== -->
 <header class="site-header">
   <div class="brand"><span class="brand-mark"></span><span class="brand-text">КЕЙСЫ</span></div>
   <div class="header-actions">
@@ -698,7 +667,6 @@
   </div>
 </header>
 
-<!-- ===== галерея выбора кейса: показывается сразу после входа ===== -->
 <div class="gallery-screen" id="galleryScreen">
   <div class="gallery-wrap">
     <div class="eyebrow">Выберите кейс</div>
@@ -730,7 +698,6 @@
   <audio id="finishSound" src="https://raw.githubusercontent.com/SaportBati/CaseSamp/refs/heads/main/finish.mp3" preload="auto"></audio>
 
   <div class="stage-area">
-    <!-- crate -->
     <div class="stage-crate" id="stageCrate">
       <div class="crate" id="crate">
         <div class="flash" id="flash"></div>
@@ -750,7 +717,6 @@
       </div>
     </div>
 
-    <!-- reel -->
     <div class="stage-reel" id="stageReel">
       <div class="reel-viewport" id="reelViewport">
         <div class="marker"></div>
@@ -790,9 +756,6 @@
 
 </div>
 </div>
-
-<!-- лента открытий — постоянная панель справа; вынесена за пределы .page,
-     поэтому остаётся видимой и в галерее выбора кейса, и внутри кейса -->
 <aside class="side-feed" id="sideFeed">
   <div class="feed-title">
     <span class="live-dot"></span>
@@ -804,37 +767,12 @@
 </aside>
 
 <script>
-// ============================================
-//  БАЗОВЫЙ АДРЕС ДЛЯ КАРТИНОК ПРИЗОВ
-// ============================================
-// Картинки не лежат рядом с сайтом (сайт — это один HTML-файл),
-// они грузятся с GitHub. Чтобы добавить свою картинку:
-//   1. Залей файл (png/jpg) в репозиторий https://github.com/SaportBati/huinya
-//   2. Впиши его имя в список CASE_IMAGES ниже, через запятую
-//   3. Обнови страницу (F5)
-window.IMAGES_BASE_URL = "https://raw.githubusercontent.com/SaportBati/huinya/refs/heads/main/";
+window.IMAGES_BASE_URL = "https://raw.githubusercontent.com/SaportBati/CaseSamp/refs/heads/main/";
 
 window.CASE_IMAGES = [
   "azp.png",
 ];
-
-// ============================================
-//  ИСТОЧНИК БАЗОВЫХ КЕЙСОВ — ТЕПЕРЬ D1, А НЕ cases.json
-// ============================================
-// Список кейсов, который показывается при открытии сайта (галерея выбора
-// кейса), теперь хранится в Cloudflare D1 (таблицы cases/prizes) и
-// отдаётся воркером через GET /api/cases. Управлять кейсами (создавать,
-// редактировать, удалять, добавлять призы) нужно через admin.html —
-// отдельную админ-панель, которая пишет прямо в D1.
-// Старый cases.json больше не используется как источник истины.
 window.CASES_API_URL = "https://curly-tooth-4ec5.aaf60251.workers.dev/api/cases";
-
-// Поддерживаем оба варианта: полная ссылка на картинку (https://...) или
-// просто имя файла из репозитория (тогда подставляем IMAGES_BASE_URL).
-// Ссылку вида "github.com/USER/REPO/blob/BRANCH/файл.png?raw=true" (это
-// адрес страницы просмотра файла на GitHub, не самого файла) превращаем в
-// настоящую прямую ссылку на raw.githubusercontent.com — так картинка
-// гарантированно отдаётся браузеру как файл, без редиректов и HTML-обёртки.
 window.resolveImageUrl = function(src){
   if (!src) return '';
   let url = src.trim();
@@ -844,28 +782,37 @@ window.resolveImageUrl = function(src){
   }
   return /^https?:\/\//i.test(url) ? url : (window.IMAGES_BASE_URL + url);
 };
-
-// ===== редкость призов =====
-// Цвет каждого приза теперь определяется его редкостью (задаётся в
-// админ-панели) — сервер сам подставляет цвет по редкости. Здесь только
-// подписи для отображения названия редкости рядом с призом.
 window.RARITY_LABELS = {
-  common: 'Комон',
-  rare: 'Рар',
-  epic: 'Эпик',
-  arcane: 'Аркана',
-  legendary: 'Легендарный'
+  secret: 'Секретный',
+  legendary: 'Легендарный',
+  unique: 'Уникальный',
+  rare: 'Редкий',
+  common: 'Обычный',
+  // старые/альтернативные id на всякий случай, чтобы не потерять подписи
+  arcane: 'Секретный',
+  epic: 'Уникальный'
 };
 window.rarityLabel = function(id){
   return window.RARITY_LABELS[id] || window.RARITY_LABELS.common;
 };
+// Ранг ценности редкости: чем меньше число — тем ценнее приз (0 — самый ценный).
+// Именно по этой шкале призы в кейсе выстраиваются слева направо.
+window.RARITY_RANK = {
+  secret: 0,
+  arcane: 0,      // алиас старого id -> топ-редкость
+  legendary: 1,
+  unique: 2,
+  epic: 2,        // алиас старого id -> уровень "уникальный"
+  rare: 3,
+  common: 4
+};
+window.rarityRank = function(id){
+  if (id in window.RARITY_RANK) return window.RARITY_RANK[id];
+  return 99; // неизвестная редкость — в конец, дальше сортируется по весу
+};
 </script>
 
 <script>
-/*
- * Авторизация через Cloudflare Worker + D1.
- * Токен и данные пользователя хранятся в localStorage.
- */
 (function(){
   const API_BASE_URL = 'https://curly-tooth-4ec5.aaf60251.workers.dev/api';
 
@@ -947,7 +894,6 @@ window.rarityLabel = function(id){
     isLoggedIn: function () { return !!authToken; },
     getCurrentUser: function () { return currentUser; },
 
-    // ===== общая лента открытий (D1, видна всем игрокам сайта) =====
     addFeedEntry: async function (entry) {
       try {
         const res = await fetch(`${API_BASE_URL}/feed`, {
@@ -980,19 +926,11 @@ window.rarityLabel = function(id){
 </script>
 
 <script>
-/*
-  БАЗА ДАННЫХ КЕЙСОВ
-  ==================
-  Хранит все созданные кейсы и их призы.
-  Данные сохраняются в localStorage для сохранения между сессиями.
-*/
+
 (function(){
   const CASES_DB_KEY = 'case_opener_cases_db';
   const FEED_DB_KEY = 'case_opener_feed_db';
 
-  // Никаких захардкоженных кейсов "по умолчанию" — единственный источник
-  // истины для списка кейсов это cases.json (см. syncPresetCasesFromJSON
-  // ниже). Пока он не загрузился, список просто пуст.
   function loadCases(){
     try {
       const saved = localStorage.getItem(CASES_DB_KEY);
@@ -1026,14 +964,6 @@ window.rarityLabel = function(id){
   loadCases();
   loadFeed();
 
-  // Подгружаем базовые кейсы из D1 (через воркер) при КАЖДОЙ загрузке
-  // страницы. Кейсы с сервера помечаются полем presetKey ("server:<id>") —
-  // по нему находим уже существующую локальную копию и обновляем её
-  // (название, цвет, картинку, призы), а если такой ещё нет — добавляем.
-  // Кейсы без этого поля (созданные вручную через "+ Создать кейс" прямо
-  // на сайте, если такая возможность используется) никогда не трогаем.
-  // Полноценное управление кейсами (создание/редактирование/удаление,
-  // призы) теперь делается в admin.html, который пишет прямо в D1.
   (async function syncPresetCasesFromServer(){
     if (!window.CASES_API_URL) return;
     try {
@@ -1076,8 +1006,6 @@ window.rarityLabel = function(id){
         changed = true;
       });
 
-      // оставляем только кейсы, реально пришедшие с сервера — никаких иных
-      // (в т.ч. оставшихся от старых версий без presetKey) быть не должно
       const onlyPresets = cases.filter(c => !!c.presetKey);
 
       if (changed || onlyPresets.length !== cases.length) {
@@ -1086,7 +1014,6 @@ window.rarityLabel = function(id){
         window.dispatchEvent(new Event('cases-db-ready'));
       }
     } catch(e) {
-      // сеть недоступна / воркер не отвечает — остаёмся на том, что уже сохранено
     }
   })();
 
@@ -1208,7 +1135,6 @@ window.rarityLabel = function(id){
 
 <script>
 (function(){
-  // ===== авторизация через Cloudflare Worker + D1 =====
   const body = document.body;
   const authOverlay = document.getElementById('authOverlay');
   const authForm = document.getElementById('authForm');
@@ -1220,15 +1146,12 @@ window.rarityLabel = function(id){
   const btnAdmin = document.getElementById('btnAdmin');
   const authSubmitBtn = authForm.querySelector('button[type="submit"], input[type="submit"]');
 
-  // Ссылка на админ-панель видна только тем, у кого аккаунт с правами
-  // администратора (поле isAdmin приходит от сервера вместе с профилем
-  // пользователя при логине/восстановлении сессии).
+
   function updateAdminLink(){
     const user = window.API ? window.API.getCurrentUser() : null;
     if (btnAdmin) btnAdmin.classList.toggle('show', !!(user && user.isAdmin));
   }
 
-  // Если токен уже сохранён (localStorage) — не спрашивать логин снова
   if (window.API && window.API.isLoggedIn()){
     body.classList.remove('not-authed');
   }
@@ -1272,13 +1195,10 @@ window.rarityLabel = function(id){
   const tickSound = document.getElementById('tickSound');
   const finishSound = document.getElementById('finishSound');
 
-  // ===== выбор кейса (только просмотр/открытие — управление кейсами
-  // теперь целиком в admin.html) =====
   const btnSelectCase = document.getElementById('btnSelectCase');
   const caseDot = document.getElementById('caseDot');
   const caseNameDisplay = document.getElementById('caseNameDisplay');
 
-  // ===== галерея выбора кейса (стартовый экран) =====
   const galleryGrid = document.getElementById('galleryGrid');
 
   function galleryVisualEl(c){
@@ -1347,17 +1267,10 @@ window.rarityLabel = function(id){
     }
   });
 
-  // Открытие выбора кейса (галерея выбора, для открытия — не редактирование)
   btnSelectCase.addEventListener('click', showGallery);
 
-  // Теперь звук разбит на 3 отдельных файла вместо одного трека с таймингами:
-  //  - openSound  (open.mp3)   — играет один раз в момент тряски/открытия кейса
-  //  - tickSound  (mis.mp3)    — играет короткими "тиками" на каждом переходе
-  //                              барабана от одного приза к следующему
-  //  - finishSound (finish.mp3)— играет один раз, как только барабан
-  //                              остановился и приз показан
-  const CRATE_ANIM_MS = 950;   // сколько трясётся ящик перед переходом в барабан
-  const SPIN_DURATION = 7.05;  // сколько секунд крутится барабан
+  const CRATE_ANIM_MS = 950;
+  const SPIN_DURATION = 7.05;
 
   function playOpenSound(){
     try{
@@ -1367,8 +1280,7 @@ window.rarityLabel = function(id){
   }
   function playTickSound(){
     try{
-      // клонируем узел, чтобы тики могли звучать внахлёст друг на друга
-      // на быстрых участках прокрутки, не обрезая предыдущий звук
+
       const t = tickSound.cloneNode(true);
       t.volume = tickSound.volume;
       t.play().catch(()=>{});
@@ -1386,8 +1298,6 @@ window.rarityLabel = function(id){
     });
   }
 
-  // ===== громкость звука: общий ползунок для open/tick/finish, значение
-  // сохраняется в localStorage и подхватывается при следующем визите =====
   const VOLUME_STORAGE_KEY = 'case_opener_volume';
   const volumeSlider = document.getElementById('volumeSlider');
   const volumeIconBtn = document.getElementById('volumeIconBtn');
@@ -1470,19 +1380,14 @@ window.rarityLabel = function(id){
   const feedTrack = document.getElementById('feedTrack');
   const feedTrackWrap = document.getElementById('feedTrackWrap');
 
-  // ===== РАБОТА С КЕЙСАМИ (только просмотр/открытие — создание, удаление
-  // и редактирование призов теперь только в admin.html) =====
-  let currentCaseId = 1; // по умолчанию первый кейс
+  let currentCaseId = 1;
   let currentCase = null;
-  let prizes = []; // призы текущего кейса
+  let prizes = [];
   let spinning = false;
 
-  // Загрузка текущего кейса
   function loadCurrentCase(){
     const cases = window.CaseDB.getCases();
     if (cases.length === 0){
-      // Кейсы из D1 ещё не подгрузились — ничего не создаём,
-      // просто ждём событие cases-db-ready, оно вызовет loadCurrentCase снова
       currentCase = null;
       prizes = [];
       caseNameDisplay.textContent = 'Загрузка...';
@@ -1499,14 +1404,10 @@ window.rarityLabel = function(id){
     applyCaseHeroImage();
     updateOpenState();
     renderPrizeShowcase();
-    // Обновить отображение текущего кейса
     caseNameDisplay.textContent = currentCase.name;
     caseDot.style.backgroundColor = currentCase.color;
   }
 
-  // Картинка кейса (сундука) вместо стандартного ящика — показывается в
-  // состоянии покоя, ровно там же где раньше была статичная SVG-иконка.
-  // Анимация тряски/вспышки и переход в барабан не трогаем.
   function applyCaseHeroImage(){
     if (!crateVisual) return;
     if (currentCase && currentCase.image){
@@ -1524,14 +1425,15 @@ window.rarityLabel = function(id){
     }
   }
 
-  // Сортировка призов от самых топовых (редких) к обычным — по весу
-  // по возрастанию: чем меньше вес, тем реже приз и тем выше он в списке.
   function sortByRarity(list){
-    return list.slice().sort((a,b)=> a.weight - b.weight);
+    return list.slice().sort((a,b)=>{
+      const ra = window.rarityRank(a.rarity);
+      const rb = window.rarityRank(b.rarity);
+      if (ra !== rb) return ra - rb; // сначала по ценности редкости: секретный -> ... -> обычный
+      return a.weight - b.weight;    // внутри одной редкости - по возрастанию шанса (реже выпадает - левее)
+    });
   }
 
-  // Список возможных призов под кнопкой "Открыть кейс": для каждого приза
-  // сразу видно картинку/кружок, название и шанс выпадения.
   function renderPrizeShowcase(){
     if (!prizeShowcase) return;
     prizeShowcase.innerHTML = '';
@@ -1568,26 +1470,22 @@ window.rarityLabel = function(id){
     });
   }
 
-  // Обновление названия кейса в UI
   function updateCaseNameDisplay(){
     if (currentCase){
       applyTheme(currentCase.color);
     }
   }
 
-  // Применение темы из кейса
   function applyTheme(color){
     const safeColor = color || '#e4ae39';
     root.style.setProperty('--accent', safeColor);
     root.style.setProperty('--accent-dim', safeColor);
   }
 
-  // Получение цвета из текущего кейса
   function getCaseColor(){
     return currentCase ? currentCase.color : '#e4ae39';
   }
 
-  // Обновление темы из текущего кейса
   function updateThemeFromCase(){
     applyTheme(getCaseColor());
   }
@@ -1598,7 +1496,6 @@ window.rarityLabel = function(id){
     hint.style.display = ok ? 'none' : 'block';
   }
 
-  // builds an <img> (with fallback to a colored dot on load error) or a plain dot
   function visualEl(p, kind){
     const dotClass = kind === 'row' ? 'dot' : (kind === 'feed' ? 'dot' : (kind === 'strip' ? 'dot' : 'reveal-dot'));
     const imgClass = kind === 'row' ? 'thumb-row' : (kind === 'feed' ? 'thumb' : (kind === 'strip' ? 'thumb' : 'reveal-thumb'));
@@ -1634,7 +1531,7 @@ window.rarityLabel = function(id){
   function buildStrip(winner){
     strip.innerHTML = '';
     const N = 60;
-    const targetIndex = 48; // where the winner lands
+    const targetIndex = 48;
     const items = [];
     for(let i=0;i<N;i++){
       items.push(i === targetIndex ? winner : weightedPick());
@@ -1654,19 +1551,13 @@ window.rarityLabel = function(id){
     return targetIndex;
   }
 
-  // ===== лента открытий: общая для всех игроков сайта =====
-  // Каждое открытие кейса отправляется на Cloudflare Worker (POST /api/feed),
-  // который пишет запись в таблицу feed_entries в D1. При загрузке страницы
-  // подгружаются последние записи (GET /api/feed), а затем лента раз в
-  // несколько секунд опрашивает воркер на предмет новых открытий у ДРУГИХ
-  // игроков (GET /api/feed?since=<последний_известный_id>) и дорисовывает их.
   const FEED_MAX_SHOWN = 80;
   const FEED_POLL_MS = 4000;
-  const FEED_SCROLL_PX_PER_SEC = 36; // скорость бесконечной прокрутки ленты вниз
+  const FEED_SCROLL_PX_PER_SEC = 36;
 
-  let feedEntries = [];       // отображаемые записи, от старых к новым
-  let feedKnownIds = new Set(); // id записей с сервера, уже показанных (без дублей)
-  let feedLastServerId = 0;   // максимальный id, полученный с сервера (для поллинга)
+  let feedEntries = [];
+  let feedKnownIds = new Set();
+  let feedLastServerId = 0;
   let feedPollTimer = null;
 
   function pad2(n){ return String(n).padStart(2,'0'); }
@@ -1674,7 +1565,6 @@ window.rarityLabel = function(id){
     const d = new Date();
     return `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())} ${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
   }
-  // "YYYY-MM-DD HH:MM:SS" -> {date:"19.08", time:"14:32"} для бейджика даты выпадения в ленте
   function splitFeedStamp(ts){
     if(!ts) return {date:'', time:''};
     const [datePart, timePart] = ts.split(' ');
@@ -1684,8 +1574,6 @@ window.rarityLabel = function(id){
     return {date, time};
   }
 
-  // "YYYY-MM-DD HH:MM:SS" -> "19.08.2026, 22:39:07" — точные дата и время
-  // для всплывающей подсказки при наведении на карточку в ленте
   function formatExactStamp(ts){
     if(!ts) return '';
     const [datePart, timePart] = ts.split(' ');
@@ -1719,7 +1607,6 @@ window.rarityLabel = function(id){
       info.appendChild(meta);
     }
 
-    // ник победителя и точные дата/время выпадения — видны сразу на карточке
     const player = document.createElement('div');
     player.className = 'fi-player';
     player.textContent = e.nickname || 'Игрок';
@@ -1735,12 +1622,7 @@ window.rarityLabel = function(id){
     return el;
   }
 
-  // полноширинная лента: карточки одна под другой, самые новые сверху.
-  // Список приходит с сервера (см. initFeed/pollFeed ниже), здесь только
-  // отрисовка того, что уже лежит в feedEntries.
   function renderFeedTrack(){
-    // сбрасываем анимацию перед перерисовкой, чтобы корректно пересчитать
-    // её заново под новый набор карточек
     feedTrack.classList.remove('marquee');
     feedTrack.style.removeProperty('--marquee-duration');
     feedTrack.innerHTML = '';
@@ -1753,15 +1635,9 @@ window.rarityLabel = function(id){
       return;
     }
 
-    // feedEntries хранится от старых к новым — на экране новые сверху
     const list = feedEntries.slice(-FEED_MAX_SHOWN).slice().reverse();
     list.forEach(e => feedTrack.appendChild(feedItemNode(e)));
 
-    // если карточки не влезают в видимую область панели — дублируем список
-    // (вторая копия сразу следом за первой) и запускаем бесконечную плавную
-    // прокрутку вниз: translateY идёт от -50% к 0%, а в момент, когда
-    // видна ровно вторая копия, лента незаметно "перескакивает" обратно —
-    // визуально это выглядит как непрерывная лента без рывков и без конца
     requestAnimationFrame(()=>{
       const contentHeight = feedTrack.scrollHeight;
       const viewportHeight = feedTrackWrap.clientHeight;
@@ -1774,9 +1650,6 @@ window.rarityLabel = function(id){
     });
   }
 
-  // Добавляет запись в отображаемый список, отбрасывая дубли по id записи
-  // с сервера (одно и то же открытие не должно появиться дважды — один раз
-  // как "своё", один раз при поллинге чужих открытий).
   function mergeFeedEntries(list){
     if(!Array.isArray(list) || !list.length) return false;
     let added = false;
@@ -1795,9 +1668,6 @@ window.rarityLabel = function(id){
     return added;
   }
 
-  // Первичная загрузка последних открытий всех игроков + запуск поллинга
-  // новых открытий (GET /api/feed?since=...), чтобы у всех на сайте лента
-  // пополнялась в реальном времени.
   async function initFeed(){
     const list = await API.getFeed();
     if(mergeFeedEntries(list)) renderFeedTrack(); else renderFeedTrack();
@@ -1808,10 +1678,6 @@ window.rarityLabel = function(id){
     }, FEED_POLL_MS);
   }
 
-  // Открытие приза: сразу пишем в общую таблицу feed_entries через воркер
-  // (D1), чтобы запись увидели все, кто сейчас на сайте. Пока идёт запрос,
-  // показываем своё открытие локально; когда сервер подтвердит — заменяем
-  // его на настоящую запись с id, чтобы не задублировать при поллинге.
   async function addToFeed(winner){
     const payload = {
       nickname: (nickInput.value || '').trim() || 'Игрок',
@@ -1833,22 +1699,15 @@ window.rarityLabel = function(id){
       mergeFeedEntries([saved]);
       renderFeedTrack();
     }
-    // если сервер недоступен — открытие всё равно останется видно локально
-    // (localEntry), просто не попадёт в общую ленту для других игроков.
+
   }
 
   initFeed();
 
-  // custom easing for the reel: keeps the strip visibly moving through most
-  // of the spin (matching the steady rattle in the audio track) instead of
-  // coasting to a near-stop in the first fifth of the duration, then settles
-  // firmly right as the "hit" sound lands. Swap the exponent to taste:
-  // lower (~1.8) = livelier/longer motion, higher (~3) = snappier finish.
   function easeOutSlot(t){
     return 1 - Math.pow(1 - t, 2.2);
   }
 
-  // spins the reel to a freshly picked winner, then reveals it in the overlay
   function spinReel(durationSec){
     spinning = true;
     const winner = weightedPick();
@@ -1866,9 +1725,6 @@ window.rarityLabel = function(id){
     const durationMs = durationSec * 1000;
     const startTime = performance.now();
 
-    // индекс приза, который сейчас проходит под указателем — используется
-    // только чтобы поймать момент перехода на следующий блок и проиграть
-    // короткий "тик" (mis.mp3); сам барабан от этого не зависит
     let lastTickIndex = Math.floor((viewportCenter - 0) / itemFullWidth);
 
     function frame(now){
@@ -1920,7 +1776,6 @@ window.rarityLabel = function(id){
     spinning = false;
   }
 
-  // crate click -> shake/flash -> crossfade into reel -> spin
   openBtn.addEventListener('click', ()=>{
     if(spinning || prizes.length < 2) return;
     spinning = true;
@@ -1943,8 +1798,6 @@ window.rarityLabel = function(id){
     }, CRATE_ANIM_MS);
   });
 
-  // "Открыть ещё" - fade the result out, un-dim the reel, spin again (no crate,
-  // так что open.mp3 здесь не нужен — тики mis.mp3 сыграют сами в процессе)
   btnAgain.addEventListener('click', ()=>{
     if(spinning) return;
     revealOverlay.classList.remove('show');
@@ -1953,7 +1806,6 @@ window.rarityLabel = function(id){
     }, 380);
   });
 
-  // "Закрыть" - fade everything back to the closed crate
   btnClose.addEventListener('click', ()=>{
     stopAllSounds();
     revealOverlay.classList.remove('show');
@@ -1963,7 +1815,6 @@ window.rarityLabel = function(id){
     updateOpenState();
   });
 
-  // ===== ИНИЦИАЛИЗАЦИЯ КЕЙСОВ ПРИ ЗАГРУЗКЕ =====
   loadCurrentCase();
   updateOpenState();
   renderPrizeShowcase();
